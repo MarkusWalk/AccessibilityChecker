@@ -25,7 +25,7 @@
 	<title>Bestände — AccessibilityChecker</title>
 </svelte:head>
 
-<div class="page">
+<div class="page container">
 	<p class="kicker">Bestände</p>
 	<h1>Vorbereitete Bestände</h1>
 	<p class="hinweis">Zwei echte Crawls und ein Rückfallbestand, gecacht als JSON in <code>src/lib/data/</code>.</p>
@@ -55,11 +55,6 @@
 </div>
 
 <style>
-	.page {
-		padding: var(--space-5);
-		max-width: 900px;
-	}
-
 	h1 {
 		margin: 0 0 var(--space-2) 0;
 	}
@@ -83,12 +78,6 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 		gap: var(--space-3);
-	}
-
-	.card {
-		border: 1px solid var(--color-border);
-		padding: var(--space-3);
-		background: var(--color-surface);
 	}
 
 	.tag {

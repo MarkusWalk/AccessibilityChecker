@@ -24,8 +24,11 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
+		align-items: baseline;
 		gap: var(--space-2) var(--space-4);
-		padding: var(--space-3) var(--space-5);
+		max-width: var(--content-width);
+		margin: 0 auto;
+		padding: var(--space-4) var(--space-5);
 	}
 
 	.hinweis {

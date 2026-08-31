@@ -31,8 +31,9 @@
 
 <style>
 	.page {
+		max-width: 42rem;
+		margin: 0 auto;
 		padding: var(--space-5);
-		max-width: 640px;
 	}
 
 	h1 {

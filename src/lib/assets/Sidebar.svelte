@@ -66,15 +66,22 @@
 		text-align: left;
 		background: none;
 		border: none;
+		border-left: 3px solid transparent;
 		border-bottom: 1px solid var(--color-border);
 		padding: var(--space-2) var(--space-3);
 		cursor: pointer;
 		font-family: var(--font-sans);
 		color: var(--color-text);
+		transition: background-color var(--motion-fast) var(--motion-ease);
+	}
+
+	.entry:hover {
+		background: var(--color-surface-tint);
 	}
 
 	.entry.active {
 		background: var(--color-surface-tint);
+		border-left-color: var(--color-accent);
 	}
 
 	.title {

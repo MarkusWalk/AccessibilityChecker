@@ -30,6 +30,7 @@ h4 {
 	font-weight: var(--font-weight-semibold);
 	line-height: var(--line-height-heading);
 	margin: 0 0 var(--space-3) 0;
+	letter-spacing: -0.01em;
 }
 
 h1 {
@@ -41,13 +42,48 @@ h2 {
 h3 {
 	font-size: var(--font-size-h3);
 }
+h4 {
+	font-size: var(--font-size-h4);
+}
 
 a {
 	color: var(--color-accent);
+	transition: color var(--motion-fast) var(--motion-ease);
+}
+
+a:hover {
+	color: var(--color-accent-hover);
 }
 
 button {
 	font-family: inherit;
+}
+
+::selection {
+	background: var(--color-blue);
+	color: var(--color-white);
+}
+
+/* Sichtbarer Fokusring statt Browser-Default — passend zu einem Werkzeug,
+   das genau das bei anderen Seiten einfordert. Nur bei Tastaturfokus, nicht
+   bei jedem Klick. */
+:focus {
+	outline: none;
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-focus-ring);
+	outline-offset: 2px;
+	border-radius: var(--radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		transition-duration: 0.001ms !important;
+	}
 }
 
 .kicker {
@@ -58,4 +94,25 @@ button {
 	text-transform: uppercase;
 	color: var(--color-accent-secondary);
 	margin: 0 0 var(--space-2) 0;
+}
+
+/* Gemeinsame Leserbreite/Außenabstand für Seiteninhalte. */
+.container {
+	max-width: var(--content-width);
+	margin: 0 auto;
+	padding: var(--space-5);
+}
+
+/* Gemeinsamer Karten-Grundstil (Bestände-Übersicht, FindingCard, ...). */
+.card {
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	padding: var(--space-3);
+	transition:
+		border-color var(--motion-base) var(--motion-ease),
+		transform var(--motion-base) var(--motion-ease);
+}
+
+.card:hover {
+	border-color: var(--color-accent);
 }

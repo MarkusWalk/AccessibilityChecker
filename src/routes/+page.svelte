@@ -2,7 +2,7 @@
 	<title>AccessibilityChecker</title>
 </svelte:head>
 
-<div class="canvas">
+<div class="canvas container">
 	<p class="kicker">Übersicht</p>
 	<h1>Willkommen</h1>
 	<p class="hinweis">Hier entsteht während des Webinars die Ansicht auf den geprüften Bestand.</p>
@@ -12,7 +12,6 @@
 	.canvas {
 		min-height: 60vh;
 		background: var(--color-surface);
-		padding: var(--space-5);
 	}
 
 	h1 {

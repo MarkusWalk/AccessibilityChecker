@@ -78,9 +78,20 @@
 		padding: var(--space-3);
 		background: var(--color-surface);
 		border-left: 3px solid var(--color-accent);
+		transition: border-color var(--motion-base) var(--motion-ease);
+	}
+
+	.card:hover {
+		border-color: var(--color-accent);
+		border-left-color: var(--color-accent);
 	}
 
 	.card.zugaenglichkeit {
+		border-left-color: var(--color-teal);
+	}
+
+	.card.zugaenglichkeit:hover {
+		border-color: var(--color-teal);
 		border-left-color: var(--color-teal);
 	}
 
@@ -127,5 +138,17 @@
 		display: flex;
 		align-items: flex-start;
 		gap: var(--space-2);
+		padding: var(--space-2);
+		cursor: pointer;
+		transition: background-color var(--motion-fast) var(--motion-ease);
+	}
+
+	.variante:hover {
+		background: var(--color-surface-tint);
+	}
+
+	.variante input {
+		margin-top: 0.3em;
+		accent-color: var(--color-accent);
 	}
 </style>

@@ -39,6 +39,9 @@
 
 <style>
 	.topbar {
+		position: sticky;
+		top: 0;
+		z-index: 10;
 		border-bottom: 1px solid var(--color-border);
 		background: var(--color-surface);
 	}
@@ -49,6 +52,8 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2) var(--space-4);
+		max-width: var(--content-width);
+		margin: 0 auto;
 		padding: var(--space-3) var(--space-5);
 	}
 
@@ -84,12 +89,16 @@
 	}
 
 	nav a {
+		display: inline-block;
 		text-decoration: none;
 		color: var(--color-text);
 		font-size: var(--font-size-small);
 		font-weight: var(--font-weight-medium);
 		padding: var(--space-1) 0;
 		border-bottom: 2px solid transparent;
+		transition:
+			color var(--motion-fast) var(--motion-ease),
+			border-color var(--motion-fast) var(--motion-ease);
 	}
 
 	nav a[aria-current='page'] {
