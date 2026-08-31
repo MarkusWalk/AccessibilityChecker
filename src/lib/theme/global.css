@@ -49,3 +49,13 @@ a {
 button {
 	font-family: inherit;
 }
+
+.kicker {
+	display: inline-block;
+	font-size: var(--font-size-small);
+	font-weight: var(--font-weight-semibold);
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--color-accent-secondary);
+	margin: 0 0 var(--space-2) 0;
+}
