@@ -1,42 +1,52 @@
-# sv
+# AccessibilityChecker
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Anwendung für den Live-Build im Webinar "Souveränität beginnt beim Prototyp"
+(IBM iX, Unblock AI / Staat Next Level). Referent: Markus Walk.
 
-## Creating a project
+Details zum Projekt, den fünf Entscheidungen und den Regeln für den
+Live-Build stehen in [`CLAUDE.md`](./CLAUDE.md). Der Vorbereitungsstand ist
+in [`docs/aufbau-vor-dem-webinar.md`](./docs/aufbau-vor-dem-webinar.md)
+protokolliert.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Einrichten
 
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.17.0 create --template minimal --types ts --install npm .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+```bash
+npm install
+npx playwright install chromium   # einmalig, für scripts/crawl.ts
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Die App läuft dann unter `http://localhost:5173` (Port ggf. abweichend,
+siehe Terminal-Ausgabe).
 
-To create a production version of your app:
+## Bestände neu erzeugen
 
-```sh
-npm run build
+```bash
+npm run crawl -- <start-url> --max-pages 20 --name <bestand>
+LLM_PROVIDER=mock npm run analyze -- <bestand>
 ```
 
-You can preview the production build with `npm run preview`.
+Ohne `ICA_API_URL`/`ICA_API_KEY` läuft die Modellanalyse automatisch über
+den Mock-Adapter (offline, deterministisch). Für echte ICA-Anbindung:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+export LLM_PROVIDER=ica
+export ICA_API_URL=...
+export ICA_API_KEY=...
+export ICA_MODEL=...   # optional
+```
+
+Das genaue ICA-Request/Response-Schema ist in `src/lib/server/llm.ts`
+(`IcaAdapter.complete`) als TODO markiert und muss dort einmal angepasst
+werden.
+
+## Absicherung während des Live-Builds
+
+```bash
+npm run tag <name>        # sichert den aktuellen Stand als live/<name>
+npm run rollback <name>   # springt hart zurück
+```
+
+## Struktur
+
+Siehe `CLAUDE.md`, Abschnitt "Aufbau".

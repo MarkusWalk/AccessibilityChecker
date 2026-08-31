@@ -12,6 +12,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"crawl": "tsx scripts/crawl.ts",
 		"analyze": "tsx scripts/analyze.ts",
+		"live-crawl": "tsx scripts/live-crawl.ts",
 		"tag": "bash scripts/tag.sh",
 		"rollback": "bash scripts/rollback.sh"
 	},
