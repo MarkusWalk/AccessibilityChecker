@@ -9,7 +9,11 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"crawl": "tsx scripts/crawl.ts",
+		"analyze": "tsx scripts/analyze.ts",
+		"tag": "bash scripts/tag.sh",
+		"rollback": "bash scripts/rollback.sh"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
