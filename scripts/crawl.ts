@@ -61,15 +61,31 @@ function slugFor(url: string): string {
 		.slice(0, 80) || 'startseite';
 }
 
+// Dateiendungen, die kein HTML sind. Playwright kann sie nicht als Seite
+// laden (löst z.T. einen Download aus), sie zählen deshalb nicht als
+// internes Link-Ziel für den Crawl.
+const NICHT_HTML_ENDUNGEN =
+	/\.(pdf|docx?|xlsx?|pptx?|jpe?g|png|gif|svg|webp|zip|ics|mp3|mp4|css|js|xml)$/i;
+
+function decodeHtmlEntities(text: string): string {
+	return text
+		.replace(/&amp;/g, '&')
+		.replace(/&quot;/g, '"')
+		.replace(/&#0?39;/g, "'")
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>');
+}
+
 function extractInternalLinks(html: string, baseUrl: string, host: string): string[] {
 	const links = new Set<string>();
 	const re = /<a\s+[^>]*href=["']([^"'#]+)["']/gi;
 	let m: RegExpExecArray | null;
 	while ((m = re.exec(html))) {
 		try {
-			const abs = new URL(m[1], baseUrl);
+			const abs = new URL(decodeHtmlEntities(m[1]), baseUrl);
 			if (abs.hostname.replace(/^www\./, '') !== host) continue;
 			if (!/^https?:$/.test(abs.protocol)) continue;
+			if (NICHT_HTML_ENDUNGEN.test(abs.pathname)) continue;
 			abs.hash = '';
 			links.add(abs.toString());
 		} catch {
@@ -88,7 +104,11 @@ async function crawlPage(
 	const context = await browser.newContext({ userAgent: USER_AGENT });
 	const page = await context.newPage();
 	try {
-		await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 });
+		await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+		// Kurz auf Nachlade-Inhalte warten, aber nicht am networkidle-Timeout
+		// scheitern (viele Behörden-Seiten werden wegen Tracking-Beacons nie
+		// wirklich "idle").
+		await page.waitForLoadState('networkidle', { timeout: 4000 }).catch(() => {});
 		const title = (await page.title()) || url;
 		const html = await page.content();
 		const slug = slugFor(url);
@@ -101,7 +121,7 @@ async function crawlPage(
 				title,
 				reach: 0, // wird nicht gecrawlt, bleibt 0 bis Analyse/Bestand es setzt
 				lebenslage: null,
-				screenshot: `src/lib/data/screenshots/${host}/${slug}.png`
+				screenshot: `/screenshots/${host}/${slug}.png`
 			},
 			html,
 			links
@@ -116,7 +136,7 @@ async function main() {
 	const host = new URL(startUrl).hostname.replace(/^www\./, '');
 	const robots = await fetchRobots(startUrl);
 
-	const screenshotDir = join(ROOT, 'src/lib/data/screenshots', host);
+	const screenshotDir = join(ROOT, 'static/screenshots', host);
 	mkdirSync(screenshotDir, { recursive: true });
 
 	const browser = await chromium.launch({ headless: true });

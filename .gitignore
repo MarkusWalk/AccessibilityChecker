@@ -6,3 +6,4 @@ build/
 !.env.example
 .DS_Store
 src/lib/data/.llm-cache/
+src/lib/data/*.raw.json
