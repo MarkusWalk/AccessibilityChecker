@@ -64,6 +64,17 @@ Globale Hilfsklassen: `.container`, `.card`, `.kicker` (aus `global.css`).
 - Spacing-Skala: `--space-1` (4px) bis `--space-7` (64px), 8px-Rhythmus
 - Schrift: IBM Plex Sans via `var(--font-sans)`
 
+## UI-Designstandard
+
+Jede UI-Aufgabe folgt diesem Standard — ohne dass er explizit wiederholt werden muss:
+
+- **Echte Visualisierungen** statt reiner Listen: Balken-, Donut- und Sparkline-Charts per SVG/CSS (kein npm-Paket)
+- **KPI-Kacheln** mit großen Zahlen, farbcodierten Oberkanten und kurzem Label
+- **Interaktive Strukturen**: Tabellen sortierbar per Klick auf Spaltenköpfe, Zeilen als Drilldown-Einstieg
+- **Charts-Zeile + Datentabelle** als Standardlayout — nie nur Text auf weißem Grund
+- **Overlay-/Detail-Pattern** für Kontextwechsel statt Seitennavigation
+- Farbcodierung über Token: Magenta = Alarm/Hoch, Blau = Primär/Verständlichkeit, Teal = Sekundär/Zugänglichkeit, Lila = Regelverteilung
+
 ## Imports in Svelte-Komponenten
 
 ```ts
