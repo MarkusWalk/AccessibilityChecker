@@ -4,11 +4,23 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Kritische Coding-Regeln
 
-**Bauschritt-Pflicht:** Nach jedem sichtbaren Zwischenschritt speichern. Stufenfolge für Interface-Entscheidungen:
-1. Komponente roh einfügen (sofort sichtbar)
-2. Zuschnitt & Layout
-3. Theme-Farben aus `tokens.css`
-4. Daten anbinden
+**Bauschritt-Pflicht — die wichtigste Regel im Live-Build.** Die fertige
+Lösung darf **nie in einem Schritt** auftauchen, auch wenn sie in Sekunden
+baubar wäre. Für jede Entscheidung gilt exakt diese Stufenfolge, **jede
+Stufe endet mit Speichern**, keine Stufe wird übersprungen oder
+zusammengefasst:
+
+1. **Primitiv.** Etwas Rohes aus den echten Daten (`data.bestand.pages`),
+   ganz ohne die vorbereitete Komponente — eine schlichte Liste, Tabelle
+   oder ein Textblock, bewusst ungestylt. Pflicht, auch wenn sie nur zehn
+   Sekunden auf dem Schirm steht.
+2. **Gestaltet.** Erst jetzt löst die vorbereitete Komponente aus
+   `src/lib/assets/` das Rohe ab, das Theme (`tokens.css`) greift.
+3. **Besser.** Zuschnitt, Platz im Layout, Zähler, Zustände.
+4. **Klug.** Logik aus `src/lib/live/` oder ein Endpunkt wird angeschlossen.
+
+Nie länger als 60 Sekunden ohne eine sichtbare, gespeicherte Änderung. Ein
+Fehler auf dem Bildschirm ist besser als kein Zwischenschritt.
 
 **Kein LLM im Render-Pfad.** `src/lib/server/llm.ts` nur von `scripts/` aus aufrufen — nie aus SvelteKit-Routes oder Komponenten.
 
