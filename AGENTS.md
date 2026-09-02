@@ -2,6 +2,18 @@
 
 This file provides guidance to agents when working with code in this repository.
 
+**Verbindlich ist `CLAUDE.md`** im Repo-Wurzelverzeichnis — die vollständige
+Anweisung für jeden Coding-Agenten, egal welches Werkzeug ihn ausführt (Claude,
+Bob/IBM Consulting Assistant, oder ein anderer). Diese Datei hier ist eine
+Kurzreferenz mit Befehlen und technischen Details, die dort nicht stehen. Bei
+Widerspruch zwischen dieser Datei und `CLAUDE.md` gilt `CLAUDE.md`.
+
+**Vor jedem Bauschritt zusätzlich lesen:** [`docs/erkenntnisse.md`](docs/erkenntnisse.md)
+— das laufende Protokoll bereits getroffener Entscheidungen und behobener
+Widersprüche (z.B. warum `Dashboard.svelte` keine eigene Seitenliste mehr hat,
+warum `GuidedFlow.svelte` ein echter Wizard ist). Wer nur diese Kurzreferenz
+liest, wiederholt sonst schon gelöste Probleme.
+
 ## Kontext
 
 Live-Webinar-Tool (AccessibilityChecker). Während des 20-minütigen Live-Builds trifft das Publikum fünf Entscheidungen per Abstimmung. Der Dev-Server läuft durch — jede gespeicherte Änderung erscheint sofort per Hot Reload.
@@ -48,7 +60,16 @@ Das Datenmodell in [`src/lib/types.ts`](src/lib/types.ts) trägt **alle** fünf 
 
 ## `src/lib/assets/` — absichtlich unbenutzt
 
-Alle Komponenten dort sind fertig gebaut, aber bewusst noch nicht eingebunden. Sie werden live eingesetzt. **Nicht vorab einbinden.**
+Alle Komponenten dort sind fertig gebaut, aber bewusst noch nicht in eine
+Route (`src/routes/+page.svelte`) **eingebunden** — das Verdrahten passiert
+live, als Teil der Vorführung. **Verboten ist nur das Verdrahten vorab.**
+
+Das Verbessern der Komponenten selbst, vor dem Webinar, ist dagegen erwünscht
+und Teil der Vorbereitung — solange keine Live-Bau-Stufe vorweggenommen wird
+(also z.B. keine fertige Sortierung o.ä. schon in einer Route sichtbar ist).
+Beispiele aus der Vorbereitung: der Wizard-Umbau von `GuidedFlow.svelte`, der
+Prioritäten-Block in `Dashboard.svelte`. Details und Begründung in
+`docs/erkenntnisse.md`.
 
 ## Während des Live-Builds tabu
 
@@ -73,7 +94,12 @@ Jede UI-Aufgabe folgt diesem Standard — ohne dass er explizit wiederholt werde
 - **Interaktive Strukturen**: Tabellen sortierbar per Klick auf Spaltenköpfe, Zeilen als Drilldown-Einstieg
 - **Charts-Zeile + Datentabelle** als Standardlayout — nie nur Text auf weißem Grund
 - **Overlay-/Detail-Pattern** für Kontextwechsel statt Seitennavigation
-- Farbcodierung über Token: Magenta = Alarm/Hoch, Blau = Primär/Verständlichkeit, Teal = Sekundär/Zugänglichkeit, Lila = Regelverteilung
+- **Farbcodierung nach Schwere, nicht nach Achse** (so tatsächlich in
+  `Badge.svelte` und `Dashboard.svelte` umgesetzt): Magenta = hoch, Lila =
+  mittel, Teal = niedrig. Blau bleibt der generelle Akzent (Primärhandlung,
+  Reichweite-Balken). Keine eigene Achsen-Farbcodierung (Verständlichkeit vs.
+  Zugänglichkeit) einführen — dafür gibt es keinen Bedarf, seit Diagramme
+  ohnehin nach Schwere aufschlüsseln.
 
 ## Imports in Svelte-Komponenten
 
