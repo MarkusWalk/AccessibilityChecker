@@ -98,6 +98,55 @@ und für jeden Agenten, der hier weiterarbeitet.
   liegt. Szene steht in der Adresse, ein Reload startet nicht bei Null.
   Alle Bewegung in `steps()`, damit es sich nach 8-Bit anfühlt.
 
+## Ungeklärt: Dashboard dupliziert die Arbeitsplatz-Sidebar
+
+Beim Nacharbeiten der vorgebauten Bausteine aufgefallen, nicht nur ein
+Kosmetikfehler, sondern ein Widerspruch zwischen zwei Dokumenten.
+
+**Der Widerspruch.** `docs/entscheidungen.md` sagt für E1: "Der Rahmen für
+alle vier [Archetypen] ist `Arbeitsplatz.svelte`: Seitenliste links, der
+Archetyp rechts oben." Das gilt unverändert auch für Option B, Dashboard.
+Aber `Dashboard.svelte` bringt selbst eine Seitenliste mit — die Kachel-Spalte
+"Alle Seiten" links im Baustein, mit eigenem `onSelectPage`. Gewinnt B, stehen
+zwei Seitenlisten auf demselben Schirm, die nichts voneinander wissen: die
+Arbeitsplatz-Sidebar links vom Rahmen, die Dashboard-Kacheln links im
+Dashboard selbst.
+
+**Warum das erst nach dem Rehearsal auffiel.** Der Probelauf hat E1 = Chat
+gebaut. Chat hat keine eigene Seitenliste, der Widerspruch bleibt darum
+unsichtbar, bis jemand testweise B durchspielt oder es live passiert.
+
+**Zwei Wege, keiner schon entschieden:**
+
+- **A · Dashboard schlank machen.** Die Kachel-Spalte aus `Dashboard.svelte`
+  streichen, der Baustein zeigt nur noch Zusammenfassung und Befundraster.
+  Seitenauswahl bleibt allein Sache der Arbeitsplatz-Sidebar. Kleinerer
+  Eingriff, ändert nur einen Baustein, `docs/entscheidungen.md` bleibt
+  unverändert richtig.
+- **B · Dashboard bleibt vollständig, Arbeitsplatz-Rahmen wird für B zur
+  Ausnahme.** Bei E1 = Dashboard keine Arbeitsplatz-Sidebar setzen, weil
+  Dashboard laut eigener Beschreibung schon "alle geprüften Seiten auf einen
+  Blick" zeigt — die äußere Sidebar wäre dann grundsätzlich überflüssig, nicht
+  nur doppelt. Erfordert eine Ergänzung in `docs/entscheidungen.md` beim
+  E1-Prompt für B ("Arbeitsplatz ohne Sidebar" oder Dashboard direkt ohne
+  Rahmen).
+
+**Entschieden am 2026-09-02: A.** `Dashboard.svelte` zeigt jetzt eine
+Zähler-Reihe und das Befundraster, die Seitenliste kommt allein aus der
+Arbeitsplatz-Sidebar. Die Prompts bleiben unverändert gültig.
+
+## Über Usability, egal welcher Pfad
+
+Der Probelauf sah nach fünf Entscheidungen verwirrend aus, obwohl jede
+Stufe funktionierte: leerer Chat auf der halben Bühne, Arbeitsfläche unter
+der Falz, rohe Regel-Kennungen, Filterleiste aus dem Bild, Viewer
+unsichtbar. Die Lehre: **Usability lässt sich nicht live bauen, sie muss
+im Rahmen stecken.** Was daraus verdrahtet wurde, steht in
+`docs/ux-prinzipien.md`. Kern: das Arbeitsobjekt ist immer die Befundliste
+der gewählten Seite, der Archetyp ist nur die Kopfzone darüber; der Rahmen
+ist selbsttragend in der Höhe, hat eine feste Kopfzone und Leerzustände,
+Grid-Kinder brechen nicht aus, Regeln stehen im Klartext.
+
 ## Über die Absicherung
 
 - **`git clean` in rollback.sh hätte den Live-Crawl gelöscht.** Jetzt sind
@@ -130,3 +179,4 @@ und für jeden Agenten, der hier weiterarbeitet.
 - Alle Optionen mit Zeitmessung durchspielen, Screenshots je Entscheidung
 - Rollback im echten Repo messen, Terminal-Alias für tag und rollback
 - Bildschirmregie und Lesbarkeit in Teams
+- Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen (`docs/ux-prinzipien.md`)

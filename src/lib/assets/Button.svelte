@@ -8,17 +8,19 @@
 	let {
 		variant = 'primary',
 		type = 'button',
+		disabled = false,
 		onclick,
 		children
 	}: {
 		variant?: 'primary' | 'secondary' | 'ghost';
 		type?: 'button' | 'submit';
+		disabled?: boolean;
 		onclick?: () => void;
 		children: Snippet;
 	} = $props();
 </script>
 
-<button class="btn {variant}" {type} {onclick}>
+<button class="btn {variant}" {type} {disabled} {onclick}>
 	{@render children()}
 </button>
 
@@ -71,5 +73,11 @@
 
 	.btn:active {
 		transform: translateY(1px);
+	}
+
+	.btn:disabled {
+		cursor: not-allowed;
+		opacity: 0.4;
+		transform: none;
 	}
 </style>

@@ -1,114 +1,100 @@
 <!--
-	E1 Archetyp B: Dashboard. Alle Seiten mit Befunden auf einen Blick.
-	Nur Props: pages, variant (wird an FindingCard weitergereicht als E4-
-	Anzeigevariante), scopeOption (E2, Default 'nirgends' — je Befund wird
-	scopeFor(f, scopeOption) berechnet und als `mode` an FindingCard
-	weitergereicht), onSelectPage. Kein eigener Fetch, keine eigene
-	Sortierlogik — das entsteht live bei E3 (sort.ts auf `pages` anwenden,
-	bevor sie hier reinkommen).
+	E1 Archetyp B: Dashboard. Zahlen zum Bestand auf einen Blick, darunter
+	die Befunde. Die Seitenliste bringt das Dashboard NICHT mehr selbst mit,
+	die liefert die Sidebar des Arbeitsplatz-Rahmens (Entscheidung A aus
+	docs/erkenntnisse.md: ein Rahmen für alle vier Archetypen, keine zwei
+	Seitenlisten auf einem Schirm).
+
+	Nur Props: pages, variant (E4-Anzeigevariante, an FindingCard
+	weitergereicht), scopeOption (E2, Default 'nirgends'), selectedUrl
+	(hebt die Zahlen der gewählten Seite hervor). Kein eigener Fetch, keine
+	eigene Sortierlogik — das entsteht live bei E3 (sort.ts auf `pages`
+	anwenden, bevor sie hier reinkommen).
+
+	Füllt die Höhe seines Containers und scrollt selbst.
 -->
 <script lang="ts">
-	import type { Page, Finding } from '$lib/types';
-	import { scopeFor, type ScopeOption } from '$lib/live/scope';
-	import Badge from './Badge.svelte';
+	import type { Page, Axis } from '$lib/types';
+	import { scopeFor, countScopes, type ScopeOption } from '$lib/live/scope';
+	import Counter from './Counter.svelte';
 	import FindingCard from './FindingCard.svelte';
 
 	let {
 		pages,
 		variant = 'text',
 		scopeOption = 'nirgends',
-		onSelectPage
+		selectedUrl = null
 	}: {
 		pages: Page[];
 		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
 		scopeOption?: ScopeOption;
-		onSelectPage?: (url: string) => void;
+		selectedUrl?: string | null;
 	} = $props();
 
-	function schwersteSeverity(page: Page): Finding['severity'] | null {
-		if (page.findings.some((f) => f.severity === 'hoch')) return 'hoch';
-		if (page.findings.some((f) => f.severity === 'mittel')) return 'mittel';
-		if (page.findings.length > 0) return 'niedrig';
-		return null;
-	}
+	const alle = $derived(pages.flatMap((p) => p.findings));
+	const hoch = $derived(alle.filter((f) => f.severity === 'hoch').length);
+	const jeAchse = $derived.by(() => {
+		const z: Record<Axis, number> = { verstaendlichkeit: 0, zugaenglichkeit: 0 };
+		for (const f of alle) z[f.axis]++;
+		return z;
+	});
+	const scopes = $derived(countScopes(alle, scopeOption));
 </script>
 
 <div class="dashboard">
-	<section class="overview">
-		<h2>Alle Seiten</h2>
-		<ul class="page-grid">
-			{#each pages as page (page.url)}
-				{@const severity = schwersteSeverity(page)}
-				<li>
-					<button class="page-tile" onclick={() => onSelectPage?.(page.url)}>
-						<span class="page-title">{page.title}</span>
-						<span class="page-meta">
-							<span>{page.findings.length} Befunde</span>
-							{#if severity}<Badge tone={severity}>{severity}</Badge>{/if}
-						</span>
-					</button>
-				</li>
-			{/each}
-		</ul>
+	<section class="overview" aria-label="Zahlen zum Bestand">
+		<Counter label="Seiten" value={pages.length} />
+		<Counter label="Befunde" value={alle.length} />
+		<Counter label="Schwere hoch" value={hoch} of={alle.length} />
+		<Counter label="Verständlichkeit" value={jeAchse.verstaendlichkeit} of={alle.length} />
+		<Counter label="Zugänglichkeit" value={jeAchse.zugaenglichkeit} of={alle.length} />
+		{#if scopeOption !== 'nirgends'}
+			<Counter label="Vorschläge" value={scopes.vorschlag} of={alle.length} />
+		{/if}
 	</section>
 
 	<section class="findings">
 		<h2>Befunde</h2>
-		<div class="finding-list">
-			{#each pages as page (page.url)}
-				{#each page.findings as finding (finding.id)}
-					<FindingCard {finding} {variant} mode={scopeFor(finding, scopeOption)} />
+		{#if alle.length === 0}
+			<p class="leerzustand">Keine Befunde im Bestand.</p>
+		{:else}
+			<div class="finding-list">
+				{#each pages as page (page.url)}
+					{#each page.findings as finding (finding.id)}
+						<FindingCard {finding} {variant} mode={scopeFor(finding, scopeOption)} />
+					{/each}
 				{/each}
-			{/each}
-		</div>
+			</div>
+		{/if}
 	</section>
 </div>
 
 <style>
 	.dashboard {
+		height: 100%;
+		min-height: 0;
+		overflow-y: auto;
+		padding: var(--space-3) var(--space-3) var(--space-4);
+	}
+
+	.overview {
 		display: grid;
-		grid-template-columns: 1fr 2fr;
+		grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
 		gap: var(--space-4);
-		padding: var(--space-4);
-	}
-
-	.page-grid {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-	}
-
-	.page-tile {
-		width: 100%;
-		text-align: left;
-		background: var(--color-surface);
+		padding: var(--space-3);
+		margin-bottom: var(--space-4);
 		border: 1px solid var(--color-border);
-		padding: var(--space-2) var(--space-3);
-		cursor: pointer;
-		font-family: var(--font-sans);
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
+		background: var(--color-surface);
 	}
 
-	.page-title {
-		font-weight: var(--font-weight-medium);
-	}
-
-	.page-meta {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		font-size: var(--font-size-small);
-		opacity: 0.75;
+	.findings h2 {
+		font-size: var(--font-size-h4);
+		margin-bottom: var(--space-2);
 	}
 
 	.finding-list {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
 		gap: var(--space-3);
 	}
 </style>

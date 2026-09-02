@@ -14,20 +14,23 @@
 	Reihenfolge der Entscheidungen ab: E2 legt fest, *ob* das System
 	überhaupt vorschlägt, E4 nur noch *wie*.
 
+	Lesbarkeit: Regeln stehen im Klartext (labels.ts), der Ausschnitt bricht
+	überall um und ist in der Höhe begrenzt, Adressen und Pfade stehen in
+	Monospace. Jeder Modus endet mit einer Handlung: Übernehmen bei einem
+	Vorschlag, sonst "Erledigt" zum Abhaken.
+
 	Nimmt ausschließlich Props entgegen, holt sich nichts selbst.
 
 	Einsatz in vier Stufen:
-	1. Primitiv: <FindingCard finding={f} /> roh in eine Liste, ungestylt
-	   betrachten (Standard-Variante 'text').
-	2. Gestaltet: in Dashboard/GuidedFlow/ScreenshotViewer einsetzen, das
-	   Theme greift automatisch (gemeinsame .card-Klasse).
+	1. Primitiv: <FindingCard finding={f} /> roh in eine Liste.
+	2. Gestaltet: in Dashboard/GuidedFlow/ScreenshotViewer einsetzen.
 	3. Besser: `variant` passend zur getroffenen E4-Antwort setzen.
-	4. Klug: `mode` aus `scopeFor(finding, gewählteOption)` mitgeben, sobald
-	   E2 entschieden ist.
+	4. Klug: `mode` aus `scopeFor(finding, gewählteOption)` mitgeben.
 -->
 <script lang="ts">
 	import type { Finding } from '$lib/types';
 	import { questionFor, type ScopeMode } from '$lib/live/scope';
+	import { ruleLabel, isTechnicalExcerpt } from '$lib/live/labels';
 	import Badge from './Badge.svelte';
 	import Tag from './Tag.svelte';
 	import Button from './Button.svelte';
@@ -36,12 +39,14 @@
 		finding,
 		variant = 'text',
 		mode,
-		onAdopt
+		onAdopt,
+		onDone
 	}: {
 		finding: Finding;
 		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
 		mode?: ScopeMode;
 		onAdopt?: (finding: Finding) => void;
+		onDone?: (finding: Finding) => void;
 	} = $props();
 
 	const achseLabel: Record<Finding['axis'], string> = {
@@ -50,28 +55,38 @@
 	};
 
 	let uebernommen = $state(false);
+	let erledigt = $state(false);
 
 	function uebernehmen() {
 		uebernommen = true;
 		onAdopt?.(finding);
 	}
 
+	function abhaken() {
+		erledigt = !erledigt;
+		if (erledigt) onDone?.(finding);
+	}
+
 	// E2 geht vor E4: ohne explizit gesetztes `mode` verhält sich die Karte
 	// wie zuvor ('vorschlag', durch `variant` bestimmt).
 	const anzeige = $derived(mode ?? 'vorschlag');
+	const technisch = $derived(isTechnicalExcerpt(finding.rule, finding.excerpt));
+	const zeigtUebernehmen = $derived(
+		anzeige === 'vorschlag' && variant === 'text' && !!finding.suggestion
+	);
 </script>
 
-<article class="card {finding.axis}">
+<article class="card {finding.axis}" class:erledigt>
 	<header class="card-header">
 		<Tag>{achseLabel[finding.axis]}</Tag>
-		<Tag>{finding.rule}</Tag>
+		<span class="regel">{ruleLabel(finding.rule)}</span>
 		<Badge tone={finding.severity}>{finding.severity}</Badge>
 		{#if finding.legalSource && anzeige === 'markierung'}
 			<Tag>{finding.legalSource}</Tag>
 		{/if}
 	</header>
 
-	<blockquote class="excerpt">{finding.excerpt}</blockquote>
+	<blockquote class="excerpt lesbar" class:technisch>{finding.excerpt}</blockquote>
 
 	{#if anzeige === 'markierung'}
 		<p class="note">Markiert zur Prüfung — hier wird nichts vorformuliert.</p>
@@ -79,19 +94,16 @@
 		<p class="frage">{questionFor(finding)}</p>
 	{:else if variant === 'text'}
 		{#if finding.suggestion}
-			<p class="suggestion">{finding.suggestion}</p>
-			{#if uebernommen}
-				<p class="uebernommen-hinweis">Übernommen</p>
-			{:else}
-				<Button variant="primary" onclick={uebernehmen}>Übernehmen</Button>
-			{/if}
+			<p class="suggestion lesbar">{finding.suggestion}</p>
+		{:else}
+			<p class="note">Kein Vorschlag vorhanden.</p>
 		{/if}
 	{:else if variant === 'begruendung'}
 		{#if finding.suggestion}
-			<p class="suggestion">{finding.suggestion}</p>
+			<p class="suggestion lesbar">{finding.suggestion}</p>
 		{/if}
 		{#if finding.rationale}
-			<p class="rationale">{finding.rationale}</p>
+			<p class="rationale lesbar">{finding.rationale}</p>
 		{/if}
 	{:else if variant === 'frage'}
 		<p class="frage">{questionFor(finding)}</p>
@@ -100,17 +112,28 @@
 			{#if finding.suggestion}
 				<label class="variante">
 					<input type="radio" name="variante-{finding.id}" checked />
-					<span>{finding.suggestion}</span>
+					<span class="lesbar">{finding.suggestion}</span>
 				</label>
 			{/if}
 			{#if finding.suggestionAlt}
 				<label class="variante">
 					<input type="radio" name="variante-{finding.id}" />
-					<span>{finding.suggestionAlt}</span>
+					<span class="lesbar">{finding.suggestionAlt}</span>
 				</label>
 			{/if}
 		</div>
 	{/if}
+
+	<footer class="aktionen">
+		{#if zeigtUebernehmen}
+			{#if uebernommen}
+				<span class="uebernommen-hinweis">Übernommen</span>
+			{:else}
+				<Button variant="primary" onclick={uebernehmen}>Übernehmen</Button>
+			{/if}
+		{/if}
+		<Button variant="ghost" onclick={abhaken}>{erledigt ? 'Wieder öffnen' : 'Erledigt'}</Button>
+	</footer>
 </article>
 
 <style>
@@ -119,7 +142,10 @@
 		padding: var(--space-3);
 		background: var(--color-surface);
 		border-left: 3px solid var(--color-accent);
-		transition: border-color var(--motion-base) var(--motion-ease);
+		transition:
+			border-color var(--motion-base) var(--motion-ease),
+			opacity var(--motion-base) var(--motion-ease);
+		min-width: 0;
 	}
 
 	.card:hover {
@@ -136,11 +162,20 @@
 		border-left-color: var(--color-teal);
 	}
 
+	.card.erledigt {
+		opacity: 0.55;
+	}
+
 	.card-header {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: var(--space-2);
 		margin-bottom: var(--space-2);
+	}
+
+	.regel {
+		font-weight: var(--font-weight-semibold);
 	}
 
 	.excerpt {
@@ -149,6 +184,15 @@
 		border-left: 2px solid var(--color-border);
 		color: var(--color-text);
 		font-style: normal;
+		max-height: 7.5rem;
+		overflow: hidden;
+	}
+
+	.excerpt.technisch {
+		hyphens: none;
+		font-family: var(--font-mono);
+		font-size: var(--font-size-small);
+		opacity: 0.85;
 	}
 
 	.suggestion {
@@ -157,28 +201,34 @@
 	}
 
 	.rationale {
-		margin: 0;
+		margin: 0 0 var(--space-2) 0;
 		font-size: var(--font-size-small);
 		color: var(--color-ink);
-		opacity: 0.75;
+		opacity: 0.8;
 	}
 
 	.note {
-		margin: 0;
+		margin: 0 0 var(--space-2) 0;
 		font-size: var(--font-size-small);
 		font-style: italic;
 	}
 
 	.frage {
-		margin: 0;
+		margin: 0 0 var(--space-2) 0;
 		font-weight: var(--font-weight-medium);
 		color: var(--color-accent-secondary);
+	}
+
+	.aktionen {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-top: var(--space-1);
 	}
 
 	.uebernommen-hinweis {
 		display: inline-flex;
 		align-items: center;
-		margin: 0;
 		font-size: var(--font-size-small);
 		font-weight: var(--font-weight-semibold);
 		color: var(--color-accent-secondary);
@@ -188,6 +238,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
+		margin-bottom: var(--space-2);
 	}
 
 	.variante {

@@ -99,7 +99,7 @@
 	.current {
 		margin: 0;
 		font-size: var(--font-size-small);
-		font-family: monospace;
+		font-family: var(--font-mono);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;

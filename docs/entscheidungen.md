@@ -54,7 +54,10 @@ Die Prompts unten verlangen diese Stufen ausdrücklich.
 **Im Code.** Die größte sichtbare Veränderung. Bausteine: `Chat.svelte`,
 `Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte`. Der Rahmen für
 alle vier ist `Arbeitsplatz.svelte`: Seitenliste links, der Archetyp rechts
-oben, darunter ein Panel für Befundkarten. Das Panel ist der Anker für E2
+oben, darunter ein Panel für Befundkarten. Der Rahmen braucht keine Höhe
+von außen und bringt Kopfzone und Leerzustände mit (`docs/ux-prinzipien.md`).
+Bei C und D `hauptAnteil="gross"` mitgeben, weil der Archetyp die Befunde
+selbst zeigt, bei B `"gleich"`. Das Panel ist der Anker für E2
 bis E4, egal welcher Archetyp gewinnt. Die Daten kommen aus dem
 Layout-Loader (`data.bestand` auf der Startseite). Bei A antwortet der
 vorbereitete Endpunkt `/api/chat`, der Verlauf wird als `history`

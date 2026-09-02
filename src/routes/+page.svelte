@@ -17,24 +17,47 @@
 	<title>AccessibilityChecker</title>
 </svelte:head>
 
+<!--
+	Seitenkopf, bewusst flach: Kicker, Headline und Stand in einer Zone,
+	damit der Arbeitsplatz darunter über der Falz beginnt. Die Headline
+	bleibt in h2-Größe; die große Display-Größe gehört der Intro.
+-->
 <div class="canvas container">
-	<p class="kicker">Übersicht</p>
-	<h1>Will<span class="akzent">kommen</span></h1>
-
-	<p class="stand">
-		Bestand <strong>{label}</strong> · {seiten}
-		{seiten === 1 ? 'Seite' : 'Seiten'} · {befunde}
-		{befunde === 1 ? 'Hinweis' : 'Hinweise'} geladen
-	</p>
+	<div class="kopf">
+		<div>
+			<p class="kicker">Übersicht</p>
+			<h1>Will<span class="akzent">kommen</span></h1>
+		</div>
+		<p class="stand">
+			Bestand <strong>{label}</strong> · {seiten}
+			{seiten === 1 ? 'Seite' : 'Seiten'} · {befunde}
+			{befunde === 1 ? 'Befund' : 'Befunde'} geladen
+		</p>
+	</div>
 </div>
 
 <style>
 	.canvas {
-		min-height: 60vh;
+		padding-top: var(--space-4);
+		padding-bottom: var(--space-3);
+	}
+
+	.kopf {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--space-2) var(--space-4);
+	}
+
+	.kicker {
+		margin-bottom: var(--space-1);
 	}
 
 	h1 {
-		margin: 0 0 var(--space-4) 0;
+		margin: 0;
+		font-size: var(--font-size-h2);
+		line-height: var(--line-height-heading);
 	}
 
 	.stand {

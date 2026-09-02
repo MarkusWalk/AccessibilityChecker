@@ -11,6 +11,7 @@
 	import FindingCard from './FindingCard.svelte';
 	import ScreenshotViewer from './ScreenshotViewer.svelte';
 	import Button from './Button.svelte';
+	import { shortTitle } from '$lib/live/labels';
 
 	let {
 		pages,
@@ -40,7 +41,7 @@
 	<div class="flow">
 		<header class="flow-header">
 			<span class="fortschritt">Seite {index + 1} von {pages.length}</span>
-			<h2>{seite.title}</h2>
+			<h2 class="lesbar">{shortTitle(seite.title)}</h2>
 		</header>
 
 		<div class="flow-body">
@@ -56,8 +57,8 @@
 		</div>
 
 		<footer class="flow-nav">
-			<Button variant="ghost" onclick={zurueck}>Zurück</Button>
-			<Button variant="primary" onclick={weiter}>Weiter</Button>
+			<Button variant="ghost" disabled={index === 0} onclick={zurueck}>Zurück</Button>
+			<Button variant="primary" disabled={index === pages.length - 1} onclick={weiter}>Weiter</Button>
 		</footer>
 	</div>
 {/if}
@@ -66,9 +67,16 @@
 	.flow {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-4);
-		padding: var(--space-4);
-		max-width: 900px;
+		gap: var(--space-3);
+		padding: var(--space-3);
+		height: 100%;
+		min-height: 0;
+		overflow-y: auto;
+		max-width: var(--lese-breite, none);
+	}
+
+	.flow-header h2 {
+		font-size: var(--font-size-h3);
 	}
 
 	.flow-header h2 {
@@ -83,8 +91,13 @@
 
 	.flow-body {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		gap: var(--space-4);
+		align-items: start;
+	}
+
+	.flow-body > * {
+		min-width: 0;
 	}
 
 	.findings {
@@ -94,7 +107,11 @@
 	}
 
 	.leer {
+		margin: 0;
+		padding: var(--space-4);
+		border: 2px dashed var(--color-border);
 		opacity: 0.7;
+		text-align: center;
 	}
 
 	.flow-nav {

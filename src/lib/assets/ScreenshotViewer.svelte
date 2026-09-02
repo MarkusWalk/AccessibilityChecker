@@ -24,6 +24,7 @@
 -->
 <script lang="ts">
 	import type { Page, Finding } from '$lib/types';
+	import { ruleLabel, shortTitle } from '$lib/live/labels';
 
 	let {
 		page,
@@ -78,7 +79,7 @@
 						style:top="{p.top}%"
 						style:width="{p.width}%"
 						style:height="{p.height}%"
-						aria-label="{f.rule}: {f.excerpt}"
+						aria-label="{ruleLabel(f.rule)}: {f.excerpt}"
 						onmouseenter={() => (hoverId = f.id)}
 						onmouseleave={() => (hoverId = null)}
 						onfocus={() => (hoverId = f.id)}
@@ -87,8 +88,8 @@
 					>
 						{#if hoverId === f.id}
 							<span class="tooltip" role="tooltip">
-								<strong>{f.rule}</strong>
-								<span>{f.suggestion ?? f.excerpt}</span>
+								<strong>{ruleLabel(f.rule)}</strong>
+								<span class="lesbar">{f.suggestion ?? f.excerpt}</span>
 							</span>
 						{/if}
 					</button>
@@ -109,7 +110,7 @@
 							class:active={f.id === activeId}
 							onclick={() => onSelect?.(f)}
 						>
-							<strong>{f.rule}</strong> — {f.excerpt}
+							<strong>{ruleLabel(f.rule)}</strong> — {f.excerpt}
 						</button>
 					</li>
 				{/each}
@@ -118,7 +119,7 @@
 	{/if}
 
 	<!-- figcaption muss erstes oder letztes Kind von figure sein (a11y) -->
-	<figcaption>{page.title}</figcaption>
+	<figcaption class="lesbar">{shortTitle(page.title)}</figcaption>
 </figure>
 
 <style>
@@ -126,11 +127,29 @@
 		margin: 0;
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
+		display: flex;
+		flex-direction: column;
+		max-height: var(--viewer-hoehe, 70vh);
+		min-height: 0;
 	}
 
+	/* Vollseiten-Screenshots sind mehrere tausend Pixel hoch: das Bild
+	   scrollt in seinem Rahmen, die Markierungen scrollen mit. */
 	.bild-wrapper {
 		position: relative;
 		line-height: 0;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+	}
+
+	.bild-wrapper > img {
+		position: relative;
+	}
+
+	.ohne-position,
+	figcaption {
+		flex: none;
 	}
 
 	img {
@@ -217,6 +236,7 @@
 	.eintrag {
 		width: 100%;
 		text-align: left;
+		overflow-wrap: anywhere;
 		background: none;
 		border: none;
 		border-left: 3px solid transparent;

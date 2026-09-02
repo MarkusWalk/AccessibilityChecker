@@ -194,6 +194,36 @@ button {
 	border-color: var(--color-accent);
 }
 
+/* Werkzeug-Fläche: für Steuerelemente (Filter, Eingaben), nicht für
+   Ergebnisse. Durchgehender Tint-Hintergrund statt Rand um jedes einzelne
+   Feld — die Fläche selbst markiert die Zone, die Felder darin sind schlicht.
+   Ergebnisse (Karten, Verlauf, Screenshot) bleiben auf .card/Weiß.
+   <div class="werkzeug-flaeche">…Filter/Eingabe…</div> */
+.werkzeug-flaeche {
+	background: var(--color-surface-tint);
+	padding: var(--space-3);
+}
+
+.werkzeug-flaeche input,
+.werkzeug-flaeche select {
+	background: var(--color-surface);
+}
+
+/* Zonen-Titel für Unterbereiche innerhalb einer Seite (z.B. "Chat",
+   "Befunde" im Arbeitsplatz). Leiser als .kicker, das dem blauen
+   Seiten-Kicker vorbehalten bleibt — keine Konkurrenz um dieselbe Rolle.
+   <p class="zonen-titel">Chat</p> */
+.zonen-titel {
+	margin: 0 0 var(--space-2) 0;
+	font-family: var(--font-mono);
+	font-size: var(--font-size-small);
+	font-weight: var(--font-weight-medium);
+	letter-spacing: var(--letter-spacing-kicker);
+	text-transform: uppercase;
+	color: var(--color-ink);
+	opacity: 0.6;
+}
+
 /* Arbeitsplatz-Layout: feste Sidebar links, Rest rechts — für
    Arbeitsplatz.svelte (der Rahmen für die E1-Archetypen). Unter 60rem
    Breite fällt die Sidebar über den Inhalt statt daneben.
@@ -226,4 +256,105 @@ button {
 
 .spalte > * {
 	min-height: 0;
+}
+
+/* ---------------------------------------------------------------------
+   Utilities für den Live-Build. Jede Stufe soll dieselben Flächen nutzen,
+   statt eigenes CSS zu erfinden. Siehe docs/ux-prinzipien.md.
+   --------------------------------------------------------------------- */
+
+/* Screenreader-only, einmal global statt je Komponente. */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+/* Kopfzone eines Panels: Titel links, Zahlen rechts, bleibt beim Scrollen
+   oben. <div class="panel-kopf"><div><strong>Rathaus</strong> · 29 Befunde</div><span class="mono">…</span></div> */
+.panel-kopf {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--space-2) var(--space-4);
+	padding: var(--space-2) var(--space-3);
+	background: var(--color-surface-tint);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.panel-kopf strong {
+	font-weight: var(--font-weight-semibold);
+}
+
+/* Leerzustand: eine ruhige Fläche mit einem Satz, nie eine weiße Bühne.
+   <p class="leerzustand">Keine Befunde auf dieser Seite.</p> */
+.leerzustand {
+	margin: 0;
+	padding: var(--space-4);
+	border: 2px dashed var(--color-border);
+	color: var(--color-ink);
+	opacity: 0.7;
+	text-align: center;
+}
+
+/* Lange Adressen und Pfade brechen überall um, statt die Spalte zu
+   sprengen. Auf Text, der aus dem Crawl kommt. */
+.lesbar {
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	hyphens: auto;
+}
+
+/* Text auf zwei Zeilen begrenzen (Seitentitel in Listen). */
+.zeilen-2 {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* Filter- und Werkzeugleiste, die nie aus dem Bild läuft: Felder brechen
+   in ein Raster um. <div class="werkzeug-flaeche filterzeile">…</div> */
+.filterzeile {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+	gap: var(--space-2);
+	align-items: center;
+}
+
+.filterzeile input,
+.filterzeile select {
+	width: 100%;
+	min-width: 0;
+	font-family: var(--font-sans);
+	font-size: var(--font-size-small);
+	padding: var(--space-1) var(--space-2);
+	border: 1px solid var(--color-border);
+	color: var(--color-text);
+}
+
+/* Zwei Spalten nebeneinander (z.B. Karten links, Screenshot rechts), deren
+   Kinder nie breiter werden als ihre Bahn. */
+.zweispaltig {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: var(--space-4);
+	align-items: start;
+}
+
+.zweispaltig > * {
+	min-width: 0;
+}
+
+/* Grid- und Flex-Kinder allgemein am Ausbrechen hindern. */
+.werkzeug > *,
+.spalte > * {
+	min-width: 0;
 }

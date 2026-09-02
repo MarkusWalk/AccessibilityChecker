@@ -20,6 +20,7 @@
 <script lang="ts">
 	import type { Page, Axis } from '$lib/types';
 	import { scopeFor, questionFor, type ScopeOption } from '$lib/live/scope';
+	import { ruleLabel, shortTitle } from '$lib/live/labels';
 
 	let {
 		pages,
@@ -65,7 +66,7 @@
 				<dd>{pages.length}</dd>
 			</div>
 			<div>
-				<dt>Hinweise insgesamt</dt>
+				<dt>Befunde insgesamt</dt>
 				<dd>{gesamt}</dd>
 			</div>
 			<div>
@@ -81,13 +82,13 @@
 
 	{#each pages as page (page.url)}
 		<section class="page-section">
-			<h2>{page.title}</h2>
-			<p class="url">{page.url}</p>
+			<h2 class="lesbar">{shortTitle(page.title)}</h2>
+			<p class="url lesbar">{page.url}</p>
 
 			{#each page.findings as f (f.id)}
 				{@const mode = scopeFor(f, scopeOption)}
-				<p class="finding">
-					<span class="regel">{f.rule}</span>
+				<p class="finding lesbar">
+					<span class="regel">{ruleLabel(f.rule)}</span>
 					<span class="achse">({achseLabel[f.axis]})</span>
 					— {f.excerpt}
 					{#if mode === 'markierung'}
@@ -99,7 +100,7 @@
 					{/if}
 				</p>
 			{:else}
-				<p class="leer">Keine Hinweise auf dieser Seite.</p>
+				<p class="leer">Keine Befunde auf dieser Seite.</p>
 			{/each}
 		</section>
 	{/each}
@@ -114,11 +115,18 @@
 
 <style>
 	.report {
-		max-width: 60rem;
+		max-width: var(--lese-breite, 60rem);
 		margin: 0 auto;
-		padding: var(--space-5);
+		padding: var(--space-4) var(--space-5);
 		background: var(--color-surface);
 		color: var(--color-text);
+		height: 100%;
+		min-height: 0;
+		overflow-y: auto;
+	}
+
+	.report-head h1 {
+		font-size: var(--font-size-h2);
 	}
 
 	.report-head {
@@ -172,10 +180,9 @@
 
 	.url {
 		margin: 0 0 var(--space-3) 0;
-		font-family: monospace;
+		font-family: var(--font-mono);
 		font-size: var(--font-size-small);
 		color: var(--color-accent);
-		word-break: break-all;
 	}
 
 	.finding {

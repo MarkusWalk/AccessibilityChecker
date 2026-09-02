@@ -50,7 +50,7 @@
 	--font-weight-semibold: 600;
 	--font-weight-bold: 700;
 
-	--font-size-small: 0.875rem; /* 14px */
+	--font-size-small: 0.9375rem; /* 15px — für Screenshare in Teams eine Stufe größer */
 	--font-size-body: 1rem; /* 16px */
 	--font-size-body-lg: 1.125rem; /* 18px */
 	--font-size-h4: 1.25rem; /* 20px */

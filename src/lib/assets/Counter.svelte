@@ -50,15 +50,18 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
+		min-width: 0;
 	}
 
 	.kicker {
-		font-family: monospace;
+		font-family: var(--font-mono);
 		font-size: var(--font-size-small);
 		font-weight: var(--font-weight-semibold);
-		letter-spacing: 0.14em;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--color-accent-secondary);
+		overflow-wrap: anywhere;
+		line-height: var(--line-height-small);
 	}
 
 	.value {
