@@ -381,8 +381,15 @@ brauchen einen echten Modelllauf, um sichtbar zu werden.
 - Vor dem Webinar alle anderen Claude-Sessions auf dem Repo schließen (Port/Browser-Konflikt)
 - Rollback im echten Repo messen, Terminal-Alias für tag und rollback
 - Bildschirmregie und Lesbarkeit in Teams
-- Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen
-  (`docs/ux-prinzipien.md`) — für Geführt nach dem Wizard-Umbau erneut prüfen
+- ~~Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen~~ erledigt
+  2026-09-02 über `/probe`: Chat, Dashboard (inkl. Prioritäten-Block),
+  Geführt (Wizard, „Schritt 1 von 352“ zählt Befunde im ganzen Bestand, nicht
+  je Seite) und Bericht je einmal mit unterschiedlichem `scope`/`variant`
+  aufgerufen, dazu `viewer=1&gruppen=1` zusammen getestet. Keine
+  Konsolenfehler, kein Umbruch aus dem Rahmen. Einzige Beobachtung: Bei
+  schmaler Sidebar wird ein langer Gruppentitel (`gruppen=1`, aus
+  `byLebenslage`) abgeschnitten statt zu umbrechen — kosmetisch, nicht
+  live-kritisch, siehe `Sidebar.svelte`.
 - Prüfen, ob `docs/entscheidungen.md` für E1 C den Wizard-Charakter (Sidebar
   wird Fortschrittsanzeige) erwähnen sollte, damit die Prompt-Vorlage dazu passt
 - Probelauf-Agenten künftig auch `docs/erkenntnisse.md` mitgeben, nicht nur
