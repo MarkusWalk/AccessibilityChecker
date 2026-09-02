@@ -172,11 +172,43 @@ Grid-Kinder brechen nicht aus, Regeln stehen im Klartext.
   Zugangsdaten da sind: Adapter fertigstellen, Weinheim einmal analysieren,
   Cache füllen, dann ist der zweite Lauf sofort.
 
+## Über den Komplett-Probelauf (2026-09-02)
+
+Ein Subagent hat E1 bis E5 sequenziell auf einem Codestand durchgebaut, mit
+den Beispieloptionen aus `docs/entscheidungen.md` (A Chat, B Gesetz, D Thema,
+D Screenshot, "Suche und Filter"), Screenshot je Entscheidung.
+
+- **Keine Überraschungen bei den Bausteinen.** Alle Props von `Arbeitsplatz`,
+  `Chat`, `FindingCard`, `ScreenshotViewer`, `scope.ts`, `sort.ts` stimmten
+  exakt mit der Doku überein. `npm run check`: 0 Fehler, 0 Warnungen, 332
+  Dateien. In keiner der fünf Stufen ein JS-Fehler in der Konsole.
+- **E3 ist ein zweiter "kam gratis mit"-Moment, stärker als E2.** Die
+  Gruppierung, das Einklappen und der Zähler je Gruppe stecken schon fertig
+  in `Sidebar.svelte`. Für "Nach Thema" reichte eine Zeile (`gruppen`-Prop),
+  keine der vier Stufen brauchte eigenen Aufbau. Auf der Bühne genauso
+  ansagen wie den E2-Moment, sonst wirkt es wie eine Pause.
+- **E5 "Suche und Filter" hat eine Falle beim Vorführen, nicht im Code.**
+  Die Suche matcht gegen Klartext (`ruleLabel()`, `excerpt`), nicht gegen
+  den rohen `rule`-Schlüssel. "alt-text-fehlt" trifft nichts, "alternativ"
+  oder "hier klicken" schon. Vor der Bühne einen Klartext-Suchbegriff
+  festlegen, sonst droht ein "0 Treffer"-Moment live vor Publikum.
+- **Zwei parallel laufende Sessions blockierten sich gegenseitig.** Eine
+  zweite Claude-Session hatte Port 5173 und den Playwright-MCP-Browser schon
+  belegt; der Testagent musste auf den fremden Vite-Server ausweichen und
+  sich ein eigenes Wegwerf-Playwright-Skript bauen. Vor dem echten Webinar:
+  alle anderen Claude-Sessions auf diesem Repo schließen, sonst blockiert
+  das den Aufbau am Tag selbst.
+- **Zeitrahmen hält.** Der Ablauf wirkt in ca. 150 Sekunden je Entscheidung
+  machbar, tendenziell schneller als veranschlagt (siehe E3).
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
 - ICA-Zugang, Adapter, Analyse mit echtem Modell
-- Alle Optionen mit Zeitmessung durchspielen, Screenshots je Entscheidung
+- ~~Alle Optionen mit Zeitmessung durchspielen, Screenshots je Entscheidung~~
+  erledigt 2026-09-02, siehe oben
+- E5-Suchbegriff für die Vorführung vorab festlegen (Klartext, kein Regel-Schlüssel)
+- Vor dem Webinar alle anderen Claude-Sessions auf dem Repo schließen (Port/Browser-Konflikt)
 - Rollback im echten Repo messen, Terminal-Alias für tag und rollback
 - Bildschirmregie und Lesbarkeit in Teams
 - Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen (`docs/ux-prinzipien.md`)
