@@ -14,8 +14,14 @@ zusammengefasst:
    ganz ohne die vorbereitete Komponente — eine schlichte Liste, Tabelle
    oder ein Textblock, bewusst ungestylt. Pflicht, auch wenn sie nur zehn
    Sekunden auf dem Schirm steht.
-2. **Gestaltet.** Erst jetzt löst die vorbereitete Komponente aus
-   `src/lib/assets/` das Rohe ab, das Theme (`tokens.css`) greift.
+2. **Gestaltet.** Das Rohe aus Stufe 1 wird durch echtes Markup ersetzt, das
+   wie die vorbereitete Komponente aus `src/lib/assets/` aussieht — Elemente
+   einzeln nacheinander geschrieben (Eingabefeld, dann Liste, dann Button,
+   …), jedes für sich sichtbar. **Nicht** die fertige Komponente importieren
+   und in einer Zeile rendern (`<Chat ... />`) — das ist kein Bauschritt,
+   das ist Kopieren. Die Datei in `src/lib/assets/` ist die **Vorlage**:
+   Struktur, Klassen, Wortwahl daraus abschreiben, nicht als Blackbox
+   einbinden.
 3. **Besser.** Zuschnitt, Platz im Layout, Zähler, Zustände.
 4. **Klug.** Logik aus `src/lib/live/` oder ein Endpunkt wird angeschlossen.
 
@@ -24,7 +30,11 @@ Fehler auf dem Bildschirm ist besser als kein Zwischenschritt.
 
 **Kein LLM im Render-Pfad.** `src/lib/server/llm.ts` nur von `scripts/` aus aufrufen — nie aus SvelteKit-Routes oder Komponenten.
 
-**`src/lib/assets/`-Komponenten** sind absichtlich unbenutzt — live einsetzen, nicht vorab einbinden.
+**`src/lib/assets/`-Komponenten sind Vorlage, nicht Bauteil.** Nicht per
+`import` als Komponente einbinden und verdrahten — das ersetzt den
+Bauschritt durch einen einzigen Copy-Paste-Moment und ist live nicht von
+"schon vorher fertig gebaut" zu unterscheiden. Stattdessen die Datei lesen
+und ihre Elemente selbst, einzeln, in die Route schreiben.
 
 **Import-Konvention:**
 - Svelte-Komponenten: `import ... from '$lib/types'` (Kit-Alias)
@@ -34,9 +44,19 @@ Fehler auf dem Bildschirm ist besser als kein Zwischenschritt.
 
 **Mock-Adapter erkennt Prompts strukturell** — Prompts aus `analyze.ts` müssen die Marker `Regel:`, `Originalsatz:` (und optional `Rechtsquelle:`) enthalten, damit `MOCK_TEMPLATES` greift.
 
+## Häufige Fehler aus Probeläufen
+
+- **`hauptAnteil` vergessen:** `Arbeitsplatz.svelte` benötigt je Archetyp den richtigen Wert: `'klein'` (Chat), `'gleich'` (Dashboard), `'gross'` (GuidedFlow/Report). Ohne ihn quetscht sich der Panel-Bereich.
+- **Dashboard darf keine eigene Seitenliste haben.** `Dashboard.svelte` zeigt Zähler und Befundraster — keine `onSelectPage`-Kachelliste. Die Seitenauswahl liegt allein in der Arbeitsplatz-Sidebar.
+- **GuidedFlow ist ein Wizard, kein Sortiermodus.** Bei E1·C muss `sidebarInteractive={false}` gesetzt werden; ohne das ist die Seitenliste weiterhin klickbar, was live wie ein Bug aussieht.
+- **`byLebenslage()` gibt `Record<string, Page[]>` zurück**, kein Array — in Svelte mit `Object.entries(gruppen)` iterieren.
+- **E5-Suche matcht gegen Klartext**, nicht gegen `rule`-Schlüssel. Suchbegriff vorab festlegen ("alternativ", "hier klicken"), nicht "alt-text-fehlt".
+- **Flex ohne `min-height: 0` kollabiert.** Chat und Sidebar schrumpfen in Flex-Reihen auf null. `.werkzeug` / `.spalte` in `global.css` sind dafür vorhanden — nutzen, nicht freihändig layouten.
+
 ## E5-Vorbereitung (Wildcard)
 
 Fertige, ungenutzte Utilities für wahrscheinliche Wünsche:
-- Export: `src/lib/live/export.ts` → `alsCsv()` / `alsMarkdown()`
-- Sortierung: `src/lib/live/sort.ts` → `nachReichweite/Schwere/Aufwand/Lebenslage()`
+- Export: `src/lib/live/export.ts` → `toCsv()` / `toMarkdown()` / `download()`
+- Sortierung: `src/lib/live/sort.ts` → `byReach/bySeverity/byEffort/byLebenslage()`
 - Komponenten: `LiveMonitor.svelte`, `ScreenshotViewer.svelte`
+- Live-Status-Endpunkt: `src/routes/api/live-status/+server.ts` (liest `live-status.json` mit Demo-Fallback)
