@@ -369,6 +369,29 @@ mit den *Freiheiten* eines echten Modells zurechtkommt. Genau solche Stellen
 — ungeprüfte Kurzantworten, die als UI-Text oder Gruppenschlüssel landen —
 brauchen einen echten Modelllauf, um sichtbar zu werden.
 
+## Bob hat im ersten Versuch alles auf einmal gebaut (2026-09-02)
+
+Bob (IBM Consulting Assistant) hat bei einem ersten Testlauf mit Chat (E1·A)
+sofort die fertige Verdrahtung gebaut, statt die vier Stufen zu zeigen.
+Ursache gefunden: `.bob/rules-agent/AGENTS.md` hatte eine eigene, schwächere
+Stufenliste als `CLAUDE.md` — Stufe 1 dort war „Komponente roh einfügen“,
+also bereits das, was in `CLAUDE.md` Stufe 2 (**Gestaltet**) heißt. Die
+eigentliche Stufe 1 (roher Datenauszug, ganz ohne die vorbereitete
+Komponente) fehlte, und der entscheidende Satz aus `CLAUDE.md` — „die
+fertige Lösung darf nie in einem Schritt auftauchen“ — stand dort nirgends.
+Ohne dieses ausdrückliche Verbot hat Bob die vier Stufen als lockere
+Reihenfolge statt als Pflicht mit Zwischenspeichern gelesen.
+
+Fix: `.bob/rules-agent/AGENTS.md` auf die exakte Stufenfolge aus
+`CLAUDE.md` (Primitiv → Gestaltet → Besser → Klug) mit der gleichen
+Verbots-Formulierung gebracht. `.bob/rules-plan/AGENTS.md` und
+`.bob/rules-ask/AGENTS.md` brauchen das nicht — die bauen nicht selbst.
+
+Lehre: „Die Regel steht in `CLAUDE.md`“ reicht nicht, wenn ein anderes
+Werkzeug seine eigene, parallele Regeldatei mitbringt (`.bob/rules-*`). Bei
+mehreren Agenten-Tools im selben Repo muss jede ihrer Regeldateien einzeln
+gegen `CLAUDE.md` geprüft werden, nicht nur `AGENTS.md`.
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
