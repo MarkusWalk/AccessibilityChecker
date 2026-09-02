@@ -233,6 +233,58 @@ echten Architekturkonflikt sichtbar gemacht, keinen Implementierungsfehler:
   Fehler. Das ist ein Vorgriff, kein Live-Bauschritt — am Tag selbst ist
   `GuidedFlow` damit sofort fertig, wenn C gewinnt.
 
+## Dritter Probelauf und das Dashboard-Prioritäten-Muster (2026-09-02)
+
+Dritter Durchlauf mit B/A/A/A/Export (Dashboard, Nirgends, Nach Reichweite,
+Ein fertiger Text, Export). Zwei Ergebnisse.
+
+**Eine bereits getroffene Entscheidung wurde vom Bau-Agenten versehentlich
+zurückgedreht.** Der Widerspruch "Dashboard dupliziert die Arbeitsplatz-
+Sidebar" (siehe oben) war am 2026-09-02 schon zugunsten von A entschieden:
+`Dashboard.svelte` bekommt keine eigene Kachel-Seitenliste. Der
+Probelauf-Agent kannte nur `CLAUDE.md` und `docs/entscheidungen.md` — nicht
+diese Datei — und hat beim Bauen von E1·B genau die gestrichene Kachel-Liste
+mit eigenem `onSelectPage` wieder eingeführt, weil das für ihn wie die
+naheliegende Lösung aussah. Erst der `npm run check`-Fehler nach dem Kopieren
+aus dem Worktree (`onSelectPage` existiert nicht auf `$$ComponentProps`) hat
+es aufgedeckt. **Lehre:** Bau-Agenten für Probeläufe müssen künftig auch auf
+`docs/erkenntnisse.md` verwiesen werden, nicht nur auf `docs/entscheidungen.md`
+— sonst wiederholen sie bereits gelöste Konflikte.
+
+**Ein reines Zähler-Dashboard beantwortet nicht die Frage, die beim Öffnen
+ansteht.** Nachbesprechung nach dem Probelauf: UX-Praxis für Dashboards
+verlangt Zweckbindung (welche Frage beantwortet dieser Blick?), Vergleich
+statt Einzelzahl, und den richtigen Diagrammtyp für die vorhandenen Daten —
+kein Liniendiagramm, weil ein Einzel-Crawl keine Zeitreihe ist. Daraus in
+`Dashboard.svelte` vorbereitet (kein Live-Bauschritt, reines CSS/Grid, keine
+neue Abhängigkeit):
+
+- **Schwere-×-Aufwand-Matrix**, Zelle Hoch×Klein hervorgehoben — das ist die
+  eigentliche Priorisierungsfrage, passend zur Grundhaltung "Arbeitsliste,
+  keine Note".
+- **Schwere je Achse** als Balken (Verständlichkeit vs. Zugänglichkeit).
+- **Reichweite der fünf meistgenutzten Seiten** als Balken — bereitet die
+  Sichtbarkeit für E3·A vor, die im Probelauf selbst noch fehlte (siehe
+  unten).
+
+Blendet sich aus, wenn der Bestand keine Befunde hat. `npm run check`: 0
+Fehler/Warnungen nach der Korrektur.
+
+**Weitere Doku-vs-Komponente-Mismatches aus diesem Lauf:**
+
+- `Arbeitsplatz.svelte` kennt kein `hauptAnteil="gleich"`-Beispiel im
+  Prompt-Text von `docs/entscheidungen.md` für Dashboard — das Prop existiert
+  (`'klein' | 'gleich' | 'gross'`), nur der Beispieltext sollte das für B
+  ausdrücklich nennen.
+- **E2·A ("Nirgends") ist die unsichtbarste Option.** `scopeFor(f,'nirgends')`
+  verhält sich identisch zu gar keinem `mode`-Prop — sichtbar wird sie nur
+  über den Zähler. Falls A live gewinnt, lohnt sich ein bewusster
+  Moderationssatz dazu.
+- **E3·A ("Nach Reichweite") hatte vor dem Prioritäten-Block keinen
+  sichtbaren Haken** — weder Sidebar noch Dashboard zeigten `reach` an, nur
+  die Reihenfolge änderte sich. Der neue Reichweite-Balken im
+  Prioritäten-Block schließt das.
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
@@ -247,3 +299,6 @@ echten Architekturkonflikt sichtbar gemacht, keinen Implementierungsfehler:
   (`docs/ux-prinzipien.md`) — für Geführt nach dem Wizard-Umbau erneut prüfen
 - Prüfen, ob `docs/entscheidungen.md` für E1 C den Wizard-Charakter (Sidebar
   wird Fortschrittsanzeige) erwähnen sollte, damit die Prompt-Vorlage dazu passt
+- Probelauf-Agenten künftig auch `docs/erkenntnisse.md` mitgeben, nicht nur
+  `docs/entscheidungen.md` — sonst wiederholen sie bereits gelöste Konflikte
+  (siehe Probelauf 3, Dashboard-Sidebar-Duplikat)
