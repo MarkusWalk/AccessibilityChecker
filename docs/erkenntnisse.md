@@ -337,14 +337,44 @@ Lehre: providerneutrale Konfiguration über Umgebungsvariablen ist nur so
 gut wie der Mechanismus, der sie tatsächlich in den Prozess lädt — das
 gehört mitgetestet, nicht nur der Adapter-Code selbst.
 
+## Analyse-Pipeline mit echtem Modell getestet (2026-09-02)
+
+`scripts/analyze.ts` mit `LLM_PROVIDER=ica` gegen einen Wegwerf-Bestand
+(2 Seiten aus `theilheim.raw.json` kopiert, `icatest`, danach wieder
+gelöscht — kein echter Bestand betroffen) laufen lassen. Ergebnis: die
+Vorschlags-/Begründungs-Felder (`judgeFinding`, JSON-Antwort) kamen sauber
+und inhaltlich passend zurück — kein einziger Parse-Fehler bei 22 Befunden.
+
+**Ein echter Fund dabei:** die `lebenslage`-Zuordnung (Fallback ans Modell,
+wenn `schaetzeLebenslageLokal` nichts findet) nahm die Modellantwort bisher
+ungeprüft per `.trim()`. Der Mock liefert dort immer ein sauberes kurzes
+Label, das echte Modell aber nicht zuverlässig: kam einmal als
+`![Reisepass beantragen Titel](...)\n\nThema: Passbeschaffung` zurück —
+Markdown-Bild plus zweite Zeile, statt der verlangten 2-4 Wörter. Wäre
+ungefiltert als `Page.lebenslage` gelandet und hätte E3·D (Gruppierung nach
+Thema) mit einer Markdown-Zeile als Gruppenüberschrift kaputt gemacht.
+
+Behoben in `scripts/analyze.ts`: `lebenslagePrompt` verlangt jetzt
+ausdrücklich "nur das Bündel selbst, kein Markdown, keine zweite Zeile",
+zusätzlich eine neue `bereinigeLebenslage()` als Sicherheitsnetz —
+überspringt reine Markdown-Bild/Link-Zeilen, nimmt die nächste nicht-leere
+Zeile, streift Label-Präfixe ("Thema:", "Lebenslage:") und
+Anführungszeichen, kappt bei 40 Zeichen. Nachgetestet: dieselbe Seite liefert
+jetzt `Reisepass-Antragstellung`. Ändert am Mock-Verhalten nichts (der
+bekommt ohnehin immer schon ein sauberes Label).
+
+Lehre: der Mock-Adapter testet nur, ob die *Form* eines Prompts stimmt
+(Marker wie `Regel:`/`Aufgabe: lebenslage` gefunden), nicht ob die Pipeline
+mit den *Freiheiten* eines echten Modells zurechtkommt. Genau solche Stellen
+— ungeprüfte Kurzantworten, die als UI-Text oder Gruppenschlüssel landen —
+brauchen einen echten Modelllauf, um sichtbar zu werden.
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
 - ~~ICA-Zugang, Adapter, Analyse mit echtem Modell~~ erledigt 2026-09-02,
-  siehe oben — Zugang funktioniert, echtes Schema bestätigt. Offen bleibt
-  nur: `scripts/analyze.ts` einmal mit `LLM_PROVIDER=ica` gegen einen
-  kleinen Bestand laufen lassen (bisher nur der Chat-Endpunkt live getestet,
-  nicht die Analyse-Pipeline).
+  siehe oben — Zugang funktioniert, echtes Schema bestätigt, Analyse-Pipeline
+  einmal komplett mit echtem Modell durchgelaufen, ein Fund dabei behoben.
 - ~~Alle Optionen mit Zeitmessung durchspielen, Screenshots je Entscheidung~~
   erledigt 2026-09-02, siehe oben
 - E5-Suchbegriff für die Vorführung vorab festlegen (Klartext, kein Regel-Schlüssel)

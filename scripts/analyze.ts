@@ -54,8 +54,33 @@ function lebenslagePrompt(page: Omit<Page, 'findings'>): string {
 		'Aufgabe: lebenslage',
 		`Titel: ${page.title}`,
 		`URL: ${page.url}`,
-		'Antworte mit einem kurzen thematischen Bündel (2-4 Wörter), zu dem diese Seite gehört.'
+		'Antworte mit einem kurzen thematischen Bündel (2-4 Wörter), zu dem diese Seite gehört.',
+		'Nur das Bündel selbst, sonst nichts: keine Einleitung, keine Erklärung,',
+		'kein Markdown, keine Anführungszeichen, keine zweite Zeile.'
 	].join('\n');
+}
+
+// Ein reales Modell hält sich nicht immer an "nur das Bündel selbst" (siehe
+// docs/erkenntnisse.md, ICA-Probelauf 2026-09-02: kam als Markdown-Bild plus
+// zweite Zeile "Thema: ..." zurück). Der Mock liefert dagegen immer schon
+// ein sauberes kurzes Label — diese Bereinigung greift nur ein, wenn es
+// etwas zu bereinigen gibt, und ändert am Mock-Verhalten nichts.
+function bereinigeLebenslage(text: string): string {
+	const zeile = text
+		.split('\n')
+		.map((z) => z.trim())
+		.filter((z) => z.length > 0)
+		// ganze Zeilen, die nur aus einem Markdown-Bild/Link bestehen, sagen
+		// nichts über das Thema — das eigentliche Label steht dann meist in
+		// der nächsten Zeile (siehe docs/erkenntnisse.md, ICA-Probelauf).
+		.find((z) => !/^!?\[[^\]]*\]\([^)]*\)$/.test(z));
+	if (!zeile) return '';
+
+	return zeile
+		.replace(/^(thema|lebenslage|bündel|antwort)\s*:\s*/i, '') // Label-Präfix
+		.replace(/^["'*_]+|["'*_]+$/g, '') // Anführungszeichen/Markdown-Betonung am Rand
+		.trim()
+		.slice(0, 40);
 }
 
 async function judgeFinding(finding: Finding): Promise<Finding> {
@@ -330,7 +355,7 @@ async function main() {
 		totalFindings += befunde.length;
 
 		const lokal = schaetzeLebenslageLokal(rawPage);
-		const lebenslage = lokal ?? (await complete(lebenslagePrompt(rawPage))).trim() ?? '';
+		const lebenslage = lokal ?? bereinigeLebenslage(await complete(lebenslagePrompt(rawPage)));
 
 		pages.push({
 			...rawPage,
