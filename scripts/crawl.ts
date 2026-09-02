@@ -11,14 +11,57 @@
 import { chromium, type Browser } from 'playwright';
 import robotsParser from 'robots-parser';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { RawCrawlResult } from '../src/lib/types.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CONTACT_EMAIL = 'm.schmitz1712@gmail.com';
-const USER_AGENT = `AccessibilityChecker-Crawler/0.1 (+Zweck: Verständlichkeits- und Zugänglichkeitsprüfung für ein Webinar-Demo-Projekt; Kontakt: ${CONTACT_EMAIL})`;
-const MIN_DELAY_MS = 1000;
+export const USER_AGENT = `AccessibilityChecker-Crawler/0.1 (+Zweck: Verständlichkeits- und Zugänglichkeitsprüfung für ein Webinar-Demo-Projekt; Kontakt: ${CONTACT_EMAIL})`;
+export const MIN_DELAY_MS = 1000;
+
+// Fester Viewport für Crawl UND für scripts/boxes.ts (zweiter Durchlauf, der
+// die Finding.box-Rechtecke misst). Beide müssen dieselbe Breite verwenden,
+// sonst passen die Vollseiten-Screenshots (fullPage: true, siehe unten) und
+// die daraus abgeleiteten Boxen nicht mehr zusammen — bei 1280 CSS-Pixel
+// Breite reflowt eine Seite nicht anders, wenn crawl.ts und boxes.ts sie
+// nacheinander laden. box.x/box.y/box.width/box.height in Finding sind daher
+// CSS-Pixel bezogen auf einen mit VIEWPORT.width breiten, fullPage
+// aufgenommenen Screenshot.
+export const VIEWPORT = { width: 1280, height: 800 };
+
+// Pfad-Schlüsselwörter, die für die Prüfung besonders relevant sind (Satzungen,
+// Ortsrecht, Bekanntmachungen, Datenschutz — Quelle für E1-Gesetzeszitate —
+// sowie Formulare/Bürgerservice). Links, deren Pfad eines davon enthält,
+// werden vor allen anderen noch offenen Links besucht.
+const PRIORITAETS_SCHLUESSELWOERTER = [
+	'satzung',
+	'ortsrecht',
+	'bekanntmachung',
+	'datenschutz',
+	'impressum',
+	'buerger',
+	'bürger',
+	'service',
+	'formular'
+];
+
+// Viele Kommunal-CMS (auch weinheim.de) generieren einen riesigen Katalog
+// einzelner "Verfahrensbeschreibung"-Blätter (ein Vorgang pro Leistung, mit
+// langer numerischer ID im Pfad, z.B. ".../vbid6024929" oder
+// "/-/verfahrensbeschreibung/..."). Deren Namen enthalten oft zufällig
+// "buerger" oder "service" (z.B. "buergergeld", "servicedienstleister") und
+// würden die Prioritäts-Warteschlange bei begrenztem maxPages allein
+// füllen, noch bevor Satzungen/Ortsrecht/Datenschutz erreicht sind. Solche
+// Katalog-Einzelseiten werden deshalb von der Priorisierung ausgenommen
+// (sie werden weiterhin normal gecrawlt, nur eben nicht vorgezogen).
+const KATALOG_MUSTER = /verfahrensbeschreibung|vbid\d+|\/\d{5,}(\/|$)/;
+
+function istPrioritaetsLink(url: string): boolean {
+	const path = decodeURIComponent(new URL(url).pathname).toLowerCase();
+	if (KATALOG_MUSTER.test(path)) return false;
+	return PRIORITAETS_SCHLUESSELWOERTER.some((wort) => path.includes(wort));
+}
 
 type CliArgs = { startUrl: string; maxPages: number; name: string };
 
@@ -37,7 +80,7 @@ function parseArgs(argv: string[]): CliArgs {
 	return { startUrl, maxPages, name };
 }
 
-async function fetchRobots(startUrl: string) {
+export async function fetchRobots(startUrl: string) {
 	const robotsUrl = new URL('/robots.txt', startUrl).toString();
 	try {
 		const res = await fetch(robotsUrl, { headers: { 'User-Agent': USER_AGENT } });
@@ -101,7 +144,7 @@ async function crawlPage(
 	host: string,
 	screenshotDir: string
 ): Promise<{ page: Omit<import('../src/lib/types.ts').Page, 'findings'>; html: string; links: string[] }> {
-	const context = await browser.newContext({ userAgent: USER_AGENT });
+	const context = await browser.newContext({ userAgent: USER_AGENT, viewport: VIEWPORT });
 	const page = await context.newPage();
 	try {
 		await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
@@ -135,14 +178,41 @@ async function main() {
 	const { startUrl, maxPages, name } = parseArgs(process.argv.slice(2));
 	const host = new URL(startUrl).hostname.replace(/^www\./, '');
 	const robots = await fetchRobots(startUrl);
+	// robots.txt kann für User-agent: * einen eigenen Crawl-Delay verlangen
+	// (z.B. weinheim.de: 30s). MIN_DELAY_MS ist nur das Minimum — ein von der
+	// Seite verlangter größerer Abstand hat Vorrang.
+	const crawlDelaySekunden = robots.getCrawlDelay?.(USER_AGENT);
+	const delayMs = Math.max(MIN_DELAY_MS, (crawlDelaySekunden ?? 0) * 1000);
+	if (crawlDelaySekunden) {
+		console.log(`robots.txt verlangt Crawl-Delay: ${crawlDelaySekunden}s — genutzt: ${delayMs}ms zwischen Abrufen.`);
+	}
 
 	const screenshotDir = join(ROOT, 'static/screenshots', host);
 	mkdirSync(screenshotDir, { recursive: true });
 
 	const browser = await chromium.launch({ headless: true });
 
+	const outPath = join(ROOT, 'src/lib/data', `${name}.raw.json`);
+	// Zwischenspeicherung alle 5 Seiten: Bricht der Crawl vorzeitig ab
+	// (Zeitdruck, Abbruch durch Markus), geht der bereits gecrawlte Teil
+	// nicht verloren — scripts/analyze.ts kann direkt mit dem Teilergebnis
+	// weiterarbeiten.
+	function schreibeZwischenstand() {
+		writeFileSync(outPath, JSON.stringify(result, null, 2), 'utf-8');
+	}
+
 	const visited = new Set<string>();
-	const queue: string[] = [startUrl];
+	// Zwei getrennte FIFO-Warteschlangen statt einer einzelnen mit unshift():
+	// Ein unshift() hätte bei jeder neu gefundenen Prioritäts-Charge die
+	// bereits wartenden Prioritäts-Links wieder nach hinten verdrängt (LIFO
+	// statt FIFO) — z.B. wurden so auf weinheim.de die auf der Startseite
+	// verlinkten Datenschutz-/Impressum-Seiten von jeder späteren Seite mit
+	// eigenen Prioritäts-Treffern immer weiter zurückgeschoben und nie
+	// erreicht. priorityQueue wird vollständig vor normalQueue geleert,
+	// innerhalb jeder der beiden bleibt die Fundreihenfolge erhalten.
+	const priorityQueue: string[] = [];
+	const normalQueue: string[] = [startUrl];
+	const imQueue = new Set<string>([startUrl]);
 	const result: RawCrawlResult = {
 		crawledAt: new Date().toISOString(),
 		startUrl,
@@ -151,8 +221,9 @@ async function main() {
 		errors: []
 	};
 
-	while (queue.length > 0 && result.pages.length < maxPages) {
-		const url = queue.shift()!;
+	while ((priorityQueue.length > 0 || normalQueue.length > 0) && result.pages.length < maxPages) {
+		const url = (priorityQueue.length > 0 ? priorityQueue.shift() : normalQueue.shift())!;
+		imQueue.delete(url);
 		if (visited.has(url)) continue;
 		visited.add(url);
 
@@ -166,28 +237,41 @@ async function main() {
 			const { page, html, links } = await crawlPage(browser, url, host, screenshotDir);
 			result.pages.push(page);
 			result.html[url] = html;
+			// Neue Links: Schlüsselwort-Treffer (Satzung, Ortsrecht, Datenschutz
+			// usw.) kommen ans Ende der Prioritäts-Warteschlange, alle anderen
+			// ans Ende der normalen — bei begrenztem maxPages werden so eher
+			// rechtlich relevante Seiten erreicht statt z.B. Terminlisten oder
+			// Presseartikel, ohne früher gefundene Prioritäts-Links zu verdrängen.
 			for (const link of links) {
-				if (!visited.has(link) && !queue.includes(link)) queue.push(link);
+				if (visited.has(link) || imQueue.has(link)) continue;
+				imQueue.add(link);
+				(istPrioritaetsLink(link) ? priorityQueue : normalQueue).push(link);
 			}
+			if (result.pages.length % 5 === 0) schreibeZwischenstand();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : String(err);
 			console.error(`Fehlgeschlagen: ${url} — ${message}`);
 			result.errors.push({ url, message });
 		}
 
-		await new Promise((r) => setTimeout(r, MIN_DELAY_MS));
+		await new Promise((r) => setTimeout(r, delayMs));
 	}
 
 	await browser.close();
 
-	const outPath = join(ROOT, 'src/lib/data', `${name}.raw.json`);
-	writeFileSync(outPath, JSON.stringify(result, null, 2), 'utf-8');
+	schreibeZwischenstand();
 	console.log(
 		`\nFertig: ${result.pages.length} Seiten, ${result.errors.length} Fehler.\nGeschrieben nach ${outPath}`
 	);
 }
 
-main().catch((err) => {
-	console.error(err);
-	process.exit(1);
-});
+// Nur als CLI ausführen, nicht beim Import (scripts/boxes.ts importiert
+// fetchRobots/USER_AGENT/MIN_DELAY_MS/VIEWPORT aus dieser Datei und darf
+// main() dabei nicht auslösen).
+const istCliAufruf = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (istCliAufruf) {
+	main().catch((err) => {
+		console.error(err);
+		process.exit(1);
+	});
+}

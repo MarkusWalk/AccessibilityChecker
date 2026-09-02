@@ -1,130 +1,185 @@
 # Die fünf Entscheidungen
 
-Was das Publikum im Webinar entscheidet, was das im Code bedeutet, und der
-Prompt, den Markus live tippt.
+Was das Publikum im Webinar entscheidet, wie die Frage auf der Folie steht,
+was das im Code bedeutet, und der Prompt, den Markus live tippt.
 
-Alle fünf müssen vor dem Webinar einmal durchgespielt sein. Jede der
-Antwortoptionen muss baubar sein, ohne dass das Datenmodell angefasst wird.
+Stand: 2026-09-02, überarbeitete Fassung. Reihenfolge ist E1 bis E5 wie hier
+nummeriert. Alle fünf müssen vor dem Webinar einmal durchgespielt sein. Jede
+Antwortoption muss baubar sein, ohne dass das Datenmodell angefasst wird.
+
+## Warum genau diese fünf
+
+Das Webinar heißt "Souveränität beginnt beim Prototyp". Jede Frage macht
+eine Entscheidung sichtbar, die ein gekauftes Produkt sonst per
+Voreinstellung für das Haus trifft. Die Kriterien:
+
+- Der Unterschied ist Sekunden nach der Abstimmung auf dem Schirm.
+- Hinter jeder Option steckt eine Haltung, nicht nur Geschmack.
+- Jede Option ist aus vorbereiteten Bausteinen in 150 Sekunden baubar.
+- Die fünf sind unabhängig voneinander. Keine Wahl macht eine spätere
+  unmöglich.
+
+Die Achsen sind getrennt: E1 Form, E2 Zuständigkeit, E3 Reihenfolge,
+E4 Ergebnisform, E5 offen.
+
+## Der sichtbare Verlauf je Entscheidung
+
+Live darf nicht einfach die fertige Lösung auftauchen. Jeder Bauschritt
+zeigt den Weg vom Primitiven zum Klugen, in vier Stufen, nach jeder Stufe
+wird gespeichert:
+
+1. **Primitiv.** Etwas Rohes erscheint: eine schlichte Liste, eine Tabelle,
+   ein Textblock aus den echten Daten. Ungestylt.
+2. **Gestaltet.** Die vorbereitete Komponente aus `src/lib/assets/` löst das
+   Rohe ab, das Theme greift.
+3. **Besser.** Zuschnitt, Platz im Layout, Zähler, Zustände.
+4. **Klug.** Die Logik aus `src/lib/live/` oder dem Endpunkt wird
+   angeschlossen. Es tut etwas.
+
+Die Prompts unten verlangen diese Stufen ausdrücklich.
 
 ---
 
-## E1 Logik
+## E1 · Sie öffnen das Werkzeug. Was sehen Sie zuerst?
 
-**Was tut das System bei einem Satz, den es für unverständlich hält, wenn
-dieser Satz wörtlich aus einem Gesetz stammt?**
+- **A · Chat.** Ein Eingabefeld. Sie stellen Fragen an den Bestand, das
+  System antwortet mit Befunden und Seiten.
+- **B · Dashboard.** Alle geprüften Seiten auf einen Blick, mit Zahlen je
+  Seite. Sie entscheiden selbst, wo Sie hinschauen.
+- **C · Geführt.** Eine Seite nach der anderen, mit ihren Befunden. Das
+  System gibt den Weg vor, Sie arbeiten ab.
+- **D · Bericht.** Ein Dokument zum Lesen und Weiterleiten, wie man es aus
+  Prüfungen kennt.
 
-- A Umformulierung vorschlagen
-- B Markieren mit Hinweis auf die Rechtsquelle, ohne Vorschlag
-- C Übergehen, Gesetzestext bleibt unangetastet
-- D Erklärenden Zusatz vorschlagen, Originalsatz bleibt stehen
-
-**Im Code.** Betrifft `fromLegalSource` und `legalSource` am Finding. Die
-Felder sind in den Daten gefüllt. Gebaut wird die Behandlung: filtern,
-kennzeichnen, oder zusätzlich anzeigen.
-
-**Prompt, den Markus tippt (Beispiel für D):**
-
-> Das Publikum hat entschieden: Bei Befunden mit `fromLegalSource: true`
-> bleibt der Originalsatz unverändert stehen. Darunter erscheint ein
-> vorgeschlagener erklärender Zusatz aus `suggestion`, sichtbar abgesetzt und
-> als Zusatz gekennzeichnet, dazu die Fundstelle aus `legalSource`. Bau das
-> in kleinen Schritten und speichere nach jedem, damit es auf dem Schirm
-> nachwächst.
-
-**Erwartete Bauzeit:** 90 bis 150 Sekunden.
-
----
-
-## E2 Archetyp
-
-**Wie begegnet man dem Ergebnis?**
-
-- A Chat, man befragt den Bestand
-- B Dashboard, alle Seiten mit Befunden auf einen Blick
-- C Geführter Flow, eine Seite nach der anderen
-
-**Im Code.** Die größte sichtbare Veränderung der zwanzig Minuten. Alle drei
-Komponenten liegen fertig in `src/lib/assets/`. Gebaut wird das Einsetzen,
-der Zuschnitt, die Theme-Anpassung und die Anbindung an die Daten.
-
-Stufenfolge, hier besonders wichtig:
-
-1. Komponente erscheint roh auf der Seite
-2. Zuschnitt, sie füllt ihren Platz im Layout
-3. Farben und Typografie aus dem Theme
-4. Anbindung an die Befunde, sie zeigt echte Daten
+**Im Code.** Die größte sichtbare Veränderung. Bausteine: `Chat.svelte`,
+`Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte`. Die Daten kommen
+aus dem Layout-Loader (`data.bestand` auf der Startseite). Bei A antwortet
+der vorbereitete Endpunkt `/api/chat`.
 
 **Prompt (Beispiel für A):**
 
-> Das Publikum hat sich für Chat entschieden. Setz `Chat.svelte` aus
-> `src/lib/assets/` in die Hauptansicht. Erst roh einfügen und speichern,
-> dann Zuschnitt, dann Theme-Farben, dann an die Befunde anbinden. Nach jeder
-> Stufe speichern.
+> Das Publikum hat entschieden: Chat. Stufe 1: Zeig auf der Startseite erst
+> eine rohe Liste der Seiten mit ihrer Befundzahl aus `data.bestand`,
+> speichern. Stufe 2: Setz `Chat.svelte` aus `src/lib/assets/` an die Stelle,
+> speichern. Stufe 3: Zuschnitt, Chat füllt den Canvas, Seitenliste als
+> Sidebar daneben, speichern. Stufe 4: `onSend` an `/api/chat` anbinden,
+> Antworten erscheinen im Verlauf, speichern.
 
 **Erwartete Bauzeit:** 120 bis 150 Sekunden.
 
 ---
 
-## E3 Priorisierung
+## E2 · Wo hört die Zuständigkeit des Systems auf?
 
-**Womit fängt das Haus am Montag an?**
+- **A · Nirgends.** Es schlägt auch vor, wie ein Paragraf aus dem
+  Baugesetzbuch besser klingt.
+- **B · Beim Gesetz.** Zitate aus Gesetzen werden markiert, aber nie
+  umgeschrieben.
+- **C · Beim Ermessen.** Ob ein Bild einen Alternativtext hat, sagt es. Ob
+  ein Satz zu lang ist, fragt es.
+- **D · Bei der Sprache.** Es prüft Technik. Texte bleiben ganz bei
+  Menschen.
 
-- A Reichweite, meistbesuchte Seiten zuerst
-- B Schwere des Befunds
-- C Aufwand, die schnellsten Korrekturen zuerst
-- D Lebenslage, alles zu einem Thema zusammen
+**Im Code.** `src/lib/live/scope.ts` weist jedem Befund einen Modus zu:
+`vorschlag`, `markierung` oder `frage`. Die Felder `fromLegalSource`,
+`legalSource`, `machineDecidable` und `axis` sind gefüllt. Sichtbar wird es
+über die Karte (Vorschlag verschwindet, Markierung oder Frage erscheint) und
+über den Zähler im Kopf: "N Vorschläge · M Markierungen · K Fragen".
 
-**Im Code.** Sortierung und Gruppierung. Die Felder `reach`, `severity`,
-`effort` und `lebenslage` sind gefüllt. A bis C sind Sortierungen, D ist eine
-Gruppierung und deshalb die aufwendigste Option. Wenn D gewinnt, zuerst die
-Gruppenüberschriften sichtbar machen, dann die Inhalte einsortieren.
+Der Impact kommt aus A. Wählt der Raum A, steht ein umformulierter Paragraf
+auf dem Schirm. Bei B bis D verschwinden ganze Gruppen von Vorschlägen.
+
+**Prompt (Beispiel für B):**
+
+> Das Publikum hat entschieden: Beim Gesetz hört es auf. Stufe 1: Zeig neben
+> jedem Befund roh den Wert von `fromLegalSource`, speichern. Stufe 2: Nutz
+> `scopeFor(finding, 'gesetz')` aus `src/lib/live/scope.ts` und gib der
+> Karte den Modus, speichern. Stufe 3: Bei Modus `markierung` die Fundstelle
+> aus `legalSource` als Tag zeigen, speichern. Stufe 4: Zähler im Kopf mit
+> `countScopes`, speichern.
+
+**Erwartete Bauzeit:** 90 bis 120 Sekunden.
+
+---
+
+## E3 · Wie arbeiten Mitarbeitende die Ergebnisse durch?
+
+- **A · Nach Reichweite.** Die Seiten zuerst, die die meisten Menschen
+  aufrufen.
+- **B · Nach Schwere.** Die Hürden zuerst, die am meisten ausschließen.
+- **C · Nach Aufwand.** Zuerst, was in fünf Minuten erledigt ist.
+- **D · Nach Thema.** Alles zu einer Lebenslage, zum Beispiel Umzug, an
+  einem Stück.
+
+**Im Code.** `src/lib/live/sort.ts`. A bis C sortieren, D gruppiert und ist
+darum die aufwendigste Option. Felder: `reach`, `severity`, `effort`,
+`lebenslage`. Wenn D gewinnt, zuerst die Gruppenüberschriften sichtbar
+machen, dann die Inhalte einsortieren.
+
+**Prompt (Beispiel für D):**
+
+> Das Publikum hat entschieden: Nach Thema. Stufe 1: Schreib über die Liste
+> roh die vorkommenden Lebenslagen als Textzeile, speichern. Stufe 2:
+> Gruppier mit `byLebenslage` aus `src/lib/live/sort.ts`, Überschriften je
+> Gruppe, speichern. Stufe 3: Befunde unter ihre Gruppe einsortieren,
+> speichern. Stufe 4: Gruppen einklappbar, Zähler je Gruppe, speichern.
 
 **Erwartete Bauzeit:** 60 bis 120 Sekunden. D eher 150.
 
 ---
 
-## E4 Handlungsform
+## E4 · Sie öffnen einen Befund. Welches Ergebnis liegt Ihnen vor?
 
-**Wie weit geht das System von sich aus?**
+- **A · Ein fertiger Text.** Übernehmen und weiter.
+- **B · Ein Vorschlag mit Begründung.** Warum, und welche Regel gilt.
+- **C · Eine Markierung und eine Frage.** Den Text schreiben Sie.
+- **D · Die Seite selbst, mit den Stellen markiert.** Fahren Sie mit der
+  Maus darüber, erscheint der Vorschlag.
 
-- A Fertiger Vorschlagstext, per Klick übernehmbar
-- B Vorschlag mit Begründung und Regelbezug
-- C Nur Markierung und eine Frage, keine Formulierung
-- D Zwei Varianten zur Auswahl
+**Im Code.** A bis C sind Anzeigevarianten von `FindingCard.svelte` über
+`suggestion` und `rationale`. D ist `ScreenshotViewer.svelte` mit den
+Rechtecken aus `box` und dem Vorschlag im Hover. Bei C wird nichts
+hinzugefügt, sondern weggelassen. Das ist schnell und darf laut kommentiert
+werden.
 
-**Im Code.** Betrifft ausschließlich `FindingCard.svelte`. Alle vier Optionen
-sind Anzeigevarianten derselben Daten (`suggestion`, `suggestionAlt`,
-`rationale`). Das ist die risikoärmste der vier planbaren Entscheidungen.
+**Prompt (Beispiel für D):**
 
-Bei C wird nichts hinzugefügt, sondern weggelassen. Das ist schnell und darf
-laut kommentiert werden.
+> Das Publikum hat entschieden: Die Seite selbst. Stufe 1: Zeig unter dem
+> ersten Befund roh das Screenshot-Bild der Seite, speichern. Stufe 2: Setz
+> `ScreenshotViewer.svelte` mit den Befunden der Seite ein, Rechtecke aus
+> `box` erscheinen, speichern. Stufe 3: Viewer bekommt seinen Platz neben
+> der Liste, speichern. Stufe 4: Hover auf ein Rechteck zeigt `suggestion`,
+> Klick springt zur Karte, speichern.
 
-**Erwartete Bauzeit:** 60 bis 90 Sekunden.
+**Erwartete Bauzeit:** 60 bis 120 Sekunden.
 
 ---
 
-## E5 Wildcard
-
-**Ein Feature, das sich das Publikum wünscht.**
+## E5 · Wildcard. Wünschen Sie sich etwas, das diese Anwendung zehnmal besser macht!
 
 Freitext im Chat, die Moderation kuratiert drei Vorschläge, eine Kurzumfrage
-entscheidet. Regel, laut gesagt: es muss etwas sein, das man sehen kann.
+entscheidet. Regel, laut gesagt: Es muss etwas sein, das man auf dem
+Bildschirm sieht.
 
 **Im Code.** Unbekannt. Vier bis fünf Minuten Bauzeit.
 
-Vorbereitung dafür:
+Rückfallwünsche der Moderation, alle in einem Speichern baubar, werden nicht
+als Rückfall angekündigt:
 
-- `LiveMonitor.svelte` und `ScreenshotViewer.svelte` liegen ungenutzt bereit
-  und decken zwei wahrscheinliche Wünsche ab
-- Export als CSV oder Markdown ist in einer Minute baubar, wenn eine
-  Hilfsfunktion vorbereitet ist
-- Filter und Suche über die Befunde sind wahrscheinlich und sollten in einer
-  Skizze existieren
-
-Die Moderation hat drei eigene Vorschläge in der Hinterhand, falls der Chat
-schweigt. Sie werden nicht als solche angekündigt.
+- **"Einschätzung"-Badge** auf Ermessensbefunden über `machineDecidable`
+- **Export** der Arbeitsliste als CSV oder Markdown, `src/lib/live/export.ts`
+- **Suche und Filter** über die Befunde, nach Achse, Schwere, Regel
+- **Live-Crawl-Monitor** für die vom Publikum genannte Adresse,
+  `LiveMonitor.svelte`
+- **Zwei Vorschläge zur Wahl** über `suggestionAlt`
 
 ---
+
+## Abschluss
+
+Das Protokoll aus `decisions/` wird am Ende als schlichte Seite gezeigt:
+fünf Entscheidungen, die der Raum getroffen hat. Das ist der eigentliche
+Ertrag der zwanzig Minuten und geht danach an die Teilnehmenden.
 
 ## Nach jeder Entscheidung
 
@@ -132,8 +187,6 @@ schweigt. Sie werden nicht als solche angekündigt.
 npm run tag e1
 ```
 
-Der Stand ist damit gesichert. `npm run rollback e1` springt zurück.
-
-Das Protokoll der tatsächlichen Abstimmungsergebnisse wird während des
-Webinars in `decisions/` mitgeschrieben. Diese Liste ist der eigentliche
-Ertrag der zwanzig Minuten und geht danach an die Teilnehmenden.
+Markus tippt das selbst. Der Agent committet und taggt während des Live-Builds
+nie. `npm run rollback e1` springt zurück. Bei Zeitüberschreitung (150
+Sekunden) bleibt der Teilzustand stehen, es geht zur nächsten Entscheidung.

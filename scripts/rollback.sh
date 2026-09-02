@@ -18,6 +18,17 @@ if ! git rev-parse "$tag" >/dev/null 2>&1; then
 fi
 
 git reset --hard "$tag" -q
-git clean -fd -q -- src/lib/data src/routes src/lib/assets src/lib/live
+# -e-Ausschlüsse: der Live-Crawl (scripts/live-crawl.ts) schreibt live.json,
+# live.raw.json und live-status.json direkt nach src/lib/data, und
+# src/lib/server/llm.ts cacht dort unter .llm-cache/. Diese Dateien sind nie
+# committet (siehe .gitignore) und sollen einen Rollback trotzdem überleben,
+# damit der Hintergrund-Crawl am Webinartag nicht neu anlaufen muss.
+git clean -fd -q \
+	-e 'src/lib/data/live.json' \
+	-e 'src/lib/data/live.raw.json' \
+	-e 'src/lib/data/live-status.json' \
+	-e 'src/lib/data/.llm-cache' \
+	-e 'src/lib/data/.llm-cache/**' \
+	-- src/lib/data src/routes src/lib/assets src/lib/live
 
 echo "Zurückgesprungen auf ${tag}"

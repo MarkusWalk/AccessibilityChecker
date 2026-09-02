@@ -184,10 +184,23 @@ class MockAdapter implements LlmAdapter {
 			return this.lebenslage(prompt);
 		}
 
-		const regel = prompt.match(/Regel:\s*(\S+)/)?.[1];
+		const regelMatch = prompt.match(/Regel:\s*(\S+)/);
+
+		// Prompts außerhalb des analyze.ts-Schemas (kein "Regel:"-Marker) —
+		// z.B. aus dem Chat-Endpunkt /api/chat — bekommen eine kurze, eigene
+		// Antwort statt eines nichtssagenden Platzhalters. Der Mock kennt den
+		// Bestand nicht wirklich; /api/chat beantwortet die typischen Fragen
+		// bereits datengetrieben (answerFromData), bevor überhaupt hierher
+		// verzweigt wird — diese Antwort ist also der Rückfall für alles
+		// andere.
+		if (!regelMatch) {
+			return this.chatRueckfall(prompt);
+		}
+
+		const regel = regelMatch[1];
 		const excerpt = prompt.match(/Originalsatz:\s*"([\s\S]*?)"/)?.[1] ?? '';
 		const legalSource = prompt.match(/Rechtsquelle:\s*(.+)/)?.[1]?.trim() ?? null;
-		const template = (regel && MOCK_TEMPLATES[regel]) || null;
+		const template = MOCK_TEMPLATES[regel] ?? null;
 
 		if (!opts?.json) {
 			return template
@@ -210,6 +223,18 @@ class MockAdapter implements LlmAdapter {
 			rationale: template.rationale,
 			effort: template.effort
 		});
+	}
+
+	// Kurze, unterstützende Antwort für Prompts ohne analyze.ts-Schema (der
+	// Chat-Endpunkt hängt die Frage als letzte Zeile "Frage: ..." an).
+	// Greift die Frage auf, statt sie zu ignorieren, und verweist auf die
+	// Seitenübersicht statt etwas zu erfinden.
+	private chatRueckfall(prompt: string): string {
+		const frage = prompt.match(/Frage:\s*(.+)/)?.[1]?.trim();
+		if (!frage) {
+			return 'Dazu liegt im Mock-Modus keine Modellantwort vor.';
+		}
+		return `Zu "${frage}" lässt sich ohne echtes Modell keine eigene Einschätzung geben. Ein Blick in die Seitenübersicht oder das Dashboard hilft an dieser Stelle weiter.`;
 	}
 
 	private lebenslage(prompt: string): string {

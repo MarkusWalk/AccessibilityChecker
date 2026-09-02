@@ -24,7 +24,30 @@ siehe Terminal-Ausgabe).
 ```bash
 npm run crawl -- <start-url> --max-pages 20 --name <bestand>
 LLM_PROVIDER=mock npm run analyze -- <bestand>
+npx tsx scripts/boxes.ts <bestand>
 ```
+
+Der dritte Schritt ist ein zweiter, kurzer Playwright-Durchlauf
+(`scripts/boxes.ts`): Er öffnet jede Seite des Bestands noch einmal, misst
+für jeden in den Findings vorkommenden `selector` das
+`getBoundingClientRect()` im echten Browser und trägt es als `box` ein
+(Rechteck in CSS-Pixeln, Ursprung oben links, bezogen auf einen mit
+`scripts/crawl.ts`-`VIEWPORT` (1280 Pixel breit) aufgenommenen
+Vollseiten-Screenshot). Dabei wird der vorhandene Screenshot unter
+`static/screenshots/<host>/` frisch überschrieben, damit Bild und Boxen
+garantiert zueinander passen. `scripts/crawl.ts` nimmt Screenshots bereits
+mit `fullPage: true` auf; `boxes.ts` tut das ebenso. robots.txt und der
+Mindestabstand von 1 Sekunde (bzw. ein von der Seite per `Crawl-delay`
+verlangter größerer Abstand) gelten für diesen zweiten Durchlauf genauso wie
+für den Crawl selbst.
+
+Weinheim ist der mitgelieferte Startbestand
+(`npm run crawl -- https://www.weinheim.de --max-pages 50 --name weinheim`,
+danach Analyse und Boxen wie oben). Theilheim, Eiterfeld und ein
+Beispielbestand (`fallback`) liegen als weitere fertige Bestände unter
+`src/lib/data/` bei — bei `fallback` sind die Boxen von Hand gegen den
+Platzhalter-Screenshot unter `static/screenshots/fallback/` gesetzt, da die
+Seite fiktiv ist und sich nicht crawlen lässt.
 
 Ohne `ICA_API_URL`/`ICA_API_KEY` läuft die Modellanalyse automatisch über
 den Mock-Adapter (offline, deterministisch). Für echte ICA-Anbindung:

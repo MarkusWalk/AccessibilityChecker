@@ -3,9 +3,9 @@
 Arbeitsliste für alles, was am Tag des Live-Builds fertig sein muss. Was hier
 nicht steht, wird live gebaut.
 
-Stand: durchgearbeitet vor dem Webinar (Abschnitte 1–7). Abschnitt 8 (Probe)
-ist ein Termin mit Markus selbst, kein Code-Artefakt — siehe die Hinweise am
-Ende dieser Datei.
+Stand: 2026-09-02, nach der Überarbeitung der fünf Entscheidungen (siehe
+`docs/entscheidungen.md`). Abschnitte 1 bis 7 sind durchgearbeitet. Abschnitt
+8 (Probe) ist ein Termin mit Markus selbst, kein Code-Artefakt.
 
 ## 1 Gerüst
 
@@ -14,7 +14,29 @@ Ende dieser Datei.
 - [x] IBM Plex Sans lokal eingebunden, kein Abruf von außen zur Laufzeit
 - [x] Startseite zeigt einen weißen Canvas mit Kopfzeile und sonst nichts
       (plus einem schmalen Pixel-Band und einer kleinen Marke — sparsam,
-      siehe CLAUDE.md/Gestaltung)
+      siehe CLAUDE.md/Gestaltung). Eine Monospace-Zeile nennt den aktiven
+      Bestand mit Seiten- und Hinweiszahl, damit man sieht, dass Daten da sind.
+- [x] Design am Foliensatz ausgerichtet: Headlines in Ink mit blauem
+      Akzentwort, Mono-Kicker, Pixelband in fünf Tönen, harte Versatzflächen
+      (`.block-blau`), gestrichelte Hinweisflächen (`.block-gestrichelt`),
+      Pixelreihe (`.pixelreihe`). Zwei Carbon-Blautöne ergänzt
+      (`--color-blue-dark`, `--color-blue-light`).
+- [ ] IBM Plex Mono liegt nicht lokal, der Kicker fällt auf den
+      System-Monospace zurück. Vor dem Termin `IBMPlexMono-Regular.woff2`
+      und `-Medium` nach `src/lib/theme/fonts/` legen und in `fonts.css`
+      eintragen. Kein Abruf von außen zur Laufzeit.
+- [x] Bestandsumschaltung in der Kopfleiste (`?bestand=<name>`), Loader in
+      `src/routes/+layout.server.ts` über `src/lib/server/bestaende.ts`.
+      Ein Bestand, der erst während des Webinars fertig wird, erscheint ohne
+      Neustart. `data.bestand.pages` ist der Einstieg für den Live-Build.
+- [x] Bauschritt-Anzeige oben rechts ("E0 / 5"), als Prop `schritt` an der
+      Topbar. Live genügt ein Wert aus dem Layout.
+- [x] Splash-Screen unter `/intro`: vier Szenen (Titel, Werkzeug, die fünf
+      Entscheidungen, Spielregeln), Leertaste oder Pfeil rechts weiter,
+      Pfeil links zurück, Enter auf Szene 4 führt auf `/`. Szene steht als
+      `#1` bis `#4` in der Adresse. Ohne Kopf- und Fußzeile, kein Scrollen
+      bei 1600×900 und 1280×720. Alle Bewegung in `steps()`, mit
+      `prefers-reduced-motion` steht alles sofort.
 
 Der weiße Canvas ist der Startpunkt der zwanzig Minuten. Er muss leer
 aussehen und trotzdem lauffähig sein.
@@ -87,30 +109,127 @@ Ohne Modell, rein regelbasiert. Schnell und verlässlich. `scripts/lib/rules.ts`
 Fertig gebaut, sauber, im Theme, aber **nicht eingebunden**. Sie liegen in
 `src/lib/assets/` und warten.
 
-- [x] `Chat.svelte`
-- [x] `Dashboard.svelte`
-- [x] `GuidedFlow.svelte`
-- [x] `FindingCard.svelte` mit allen vier Anzeigevarianten aus E4
+- [x] `Chat.svelte` — E1 Archetyp A. Props: `messages`, `onSend`.
+- [x] `Dashboard.svelte` — E1 Archetyp B. Props: `pages`, `variant` (E4-
+      Anzeigevariante, an `FindingCard` weitergereicht, Default `'text'`),
+      `onSelectPage`.
+- [x] `GuidedFlow.svelte` — E1 Archetyp C. Props: `pages`, `variant`,
+      `index`, `onIndexChange`.
+- [x] `Report.svelte` — E1 Archetyp D. Props: `pages`, `bestandLabel`. Ein
+      lesbares, druckbares Dokument (`@media print`): Kopf mit Datum,
+      Zusammenfassung je Achse, dann je Seite eine Überschrift mit URL und
+      die Befunde als Absätze. Trägt den BITV-Hinweis aus CLAUDE.md/"Was
+      dieses Werkzeug nicht ist" im Fußtext.
+- [x] `FindingCard.svelte` — E4. Props: `finding`, `variant: 'text' |
+      'begruendung' | 'frage' | 'zwei'` (A/B/C/E5-Rückfall), optional
+      `mode?: ScopeMode` aus `scope.ts` (E2, geht `variant` vor — bei
+      `'markierung'`/`'frage'` zeigt die Karte unabhängig von `variant`
+      keinen Vorschlag), `onAdopt`. Bei `variant="text"` löst der
+      "Übernehmen"-Button (`Button.svelte`) `onAdopt(finding)` aus und zeigt
+      danach "Übernommen".
+- [x] `ScreenshotViewer.svelte` — E4 Variante D. Props: `page`, `findings`
+      (Default `page.findings`), `onSelect`, `activeId`. Rechtecke aus
+      `box` werden in Prozent der natürlichen Bildgröße positioniert (liest
+      `naturalWidth`/`naturalHeight` per `onload`), Farbe Blau, bei
+      `severity: 'hoch'` Magenta, Hover/Fokus zeigt Regel + Vorschlag als
+      Tooltip, Klick ruft `onSelect`. Rechtecke sind Buttons mit
+      `aria-label`, also tastaturbedienbar. Befunde ohne `box` (aktuell der
+      Regelfall, siehe Abschnitt 5a) erscheinen als Liste unter dem Bild.
 - [x] `Sidebar.svelte`
 - [x] `LiveMonitor.svelte`
-- [x] `ScreenshotViewer.svelte`
+- [x] `Counter.svelte` — E5-Rückfall. Props: `label`, `value`, optional
+      `of`. Große Zahl in Plex Sans Bold, Kicker in Monospace, optional eine
+      Reihe kleiner Quadrate im Pixelstil (`value` von `of`, max. 20). Passt
+      für den Kopfzeilen-Zähler aus E2 (`countScopes()`) und für einfache
+      Kennzahlen ("17 Seiten").
 - [x] `Button.svelte` und die übrigen Grundbausteine (`Badge.svelte`,
       `Tag.svelte`)
 
 Jede Komponente nimmt ihre Daten über Eigenschaften entgegen und holt sich
-nichts selbst. Alle acht wurden vor dem Commit einmal isoliert mit echten
-Bestandsdaten gerendert und geprüft (Route wieder entfernt).
+nichts selbst. Alle wurden vor dem Commit einmal isoliert mit echten
+Bestandsdaten gerendert und geprüft (Route `_probe` wieder entfernt), siehe
+Abschnitt 5a.
 
-Zusätzlich als Skizze für E3/E5 vorbereitet, ebenfalls ungenutzt:
+## 5a Scope, Sortierung, Export und Chat-Endpunkt
 
-- [x] `src/lib/live/sort.ts` — die vier Sortier-/Gruppierfunktionen aus E3
-- [x] `src/lib/live/export.ts` — CSV- und Markdown-Export der Befunde
+Ebenfalls vorbereitet, ungenutzt bis zur jeweiligen Entscheidung.
+
+**`src/lib/live/scope.ts` (E2).**
+
+- `scopeFor(finding, option: ScopeOption): ScopeMode` — `ScopeOption` ist
+  `'nirgends' | 'gesetz' | 'ermessen' | 'sprache'` (A–D aus E2),
+  `ScopeMode` ist `'vorschlag' | 'markierung' | 'frage'`. Regeln, kurz
+  kommentiert im Code: `nirgends` → immer `vorschlag`; `gesetz` →
+  `fromLegalSource` entscheidet zwischen `markierung` und `vorschlag`;
+  `ermessen` → Gesetzestext bleibt `markierung`, sonst entscheidet
+  `machineDecidable` zwischen `vorschlag` und `frage`; `sprache` → nur die
+  Achse Zugänglichkeit bekommt `vorschlag`, Verständlichkeit immer
+  `markierung`.
+- `countScopes(findings, option): Record<ScopeMode, number>` — für den
+  Kopfzeilen-Zähler ("N Vorschläge · M Markierungen · K Fragen"), passend zu
+  `Counter.svelte`.
+- `questionFor(finding): string` — kurze, unterstützende Frage je Regel für
+  Modus `'frage'`, mit achsenneutralem Rückfall für Regeln ohne eigene
+  Formulierung.
+- Aktueller Datenstand (`theilheim.json`): mit Option `'gesetz'` ergeben
+  sich 380 `vorschlag` und 15 `markierung`, 0 `frage` — `machineDecidable`
+  ist in allen drei Beständen bislang durchgängig `true`, Modus `'frage'`
+  hat also noch keinen echten Datenfall (nur mit `mode` manuell in der
+  Probe getestet). Für E2-Option `'ermessen'` ist das ohne Weiteres
+  baubar, zeigt live aber ggf. keine `frage`-Karte, wenn sich das nicht
+  vorher ändert.
+
+**`src/lib/live/sort.ts` (E3).** Exporte umbenannt auf die in
+`docs/entscheidungen.md` referenzierten Namen: `byReach(pages)`,
+`bySeverity(pages)`, `byEffort(pages)` (alle `Page[] -> Page[]`),
+`byLebenslage(pages): Record<string, Page[]>` (Gruppierung, Schlüssel
+`page.lebenslage ?? 'Ohne Zuordnung'`).
+
+**`src/lib/live/export.ts` (E5-Rückfall).** `toCsv(pages)`,
+`toMarkdown(pages)` unverändert in der Logik, nur umbenannt (vorher
+`alsCsv`/`alsMarkdown`). Neu: `download(filename, text)` — löst über einen
+unsichtbaren `<a download>` einen Browser-Download aus, läuft nur
+clientseitig (no-op ohne `document`, z.B. während SSR-Import).
+
+**`src/routes/api/chat/+server.ts` (E1, Stufe 4 von Chat).**
+`POST { bestand: string, question: string, history?: {role, text}[] }` →
+`200 { answer: string, provider: string, error?: string }`. Lädt den
+Bestand über `resolveBestand()`, baut je Seite einen kompakten Kontext
+(Titel, URL, Befundzahl je Achse, die fünf schwersten Befunde mit Regel und
+Auszug, insgesamt auf ca. 12.000 Zeichen gekürzt), formuliert eine deutsche
+Systemanweisung (unterstützender Ton, antwortet nur aus dem Bestand, nennt
+Seiten mit URL, keine Noten, keine Wörter wie "Fehler"/"Verstoß") und ruft
+`complete()` aus `src/lib/server/llm.ts` auf — der Plattencache dort greift
+automatisch, ein zweiter Lauf mit derselben Frage antwortet sofort. Jeder
+Fehlerfall (leere Frage, ungültiges JSON, Adapterfehler) kommt mit Status
+200 und `answer: "Das System kann diese Frage gerade nicht beantworten."`
+plus Feld `error` zurück, der Chat bleibt also nie in einem rohen
+Fehlerzustand hängen. `GET` auf denselben Pfad liefert eine kurze
+JSON-Beschreibung des Endpunkts.
+
+Getestet mit `LLM_PROVIDER=mock` gegen den laufenden Dev-Server (Port
+5174): `GET`/`POST` liefern die erwartete Form, der Cache greift beim
+zweiten identischen Aufruf (~20 ms statt eines vollen Requests), History
+und ein unbekannter Bestandsname (Rückfall über `resolveBestand`) laufen
+sauber durch. Der `MockAdapter` in `llm.ts` ist auf die Prompt-Form von
+`scripts/analyze.ts` zugeschnitten (er sucht `Regel:`/`Originalsatz:` im
+Prompt) und liefert für Chat-Prompts darum nur einen generischen
+Platzhaltertext ("[Mock] Kein Vorlagen-Eintrag …") statt einer sinnvollen
+Antwort — der Endpunkt selbst arbeitet korrekt, das ist eine Einschränkung
+des Mocks, die `llm.ts` gehört (dort nicht angefasst, siehe CLAUDE.md).
+Mit `LLM_PROVIDER=ica` und echtem Zugang antwortet derselbe Endpunkt ohne
+Codeänderung sinnvoll.
 
 ## 6 Absicherung
 
 - [x] `npm run tag <name>` committet und setzt `live/<name>`
 - [x] `npm run rollback <name>` springt hart zurück
 - [x] Geprüft: Rollback lief in ~240 ms (deutlich unter 5 Sekunden)
+- [x] Live-Dateien überleben den Rollback: `live.json`, `live.raw.json`,
+      `live-status.json` und `.llm-cache/` sind vom `git clean` ausgenommen
+- [x] Der Agent committet und taggt während des Live-Builds nie. Markus
+      sichert selbst mit `npm run tag`. Bei Zeitüberschreitung bleibt der
+      Teilzustand stehen.
 - [x] Einmal geübt, mit einem absichtlich zerstörten Zustand (kaputte
       Syntax + Stördatei) — beides war nach dem Rollback weg
 - [ ] Auf eine Tastenkombination gelegt — das ist eine
@@ -135,8 +254,13 @@ Zusätzlich als Skizze für E3/E5 vorbereitet, ebenfalls ungenutzt:
 Nicht von einem Coding-Agenten automatisierbar — ein Termin mit Markus
 selbst, kurz vor dem Webinar:
 
+- [ ] Splash unter `/intro` einmal durchklicken, dann `/` öffnen
 - [ ] Alle vier planbaren Entscheidungen (E1–E4) einmal in jeder
-      Antwortoption bauen, mit Zeitmessung
+      Antwortoption bauen, mit Zeitmessung, in den vier Stufen aus
+      CLAUDE.md (Primitiv, Gestaltet, Besser, Klug)
+- [ ] ICA-Zugangsdaten und Request-Schema eintragen, `IcaAdapter.complete`
+      in `src/lib/server/llm.ts` fertigstellen, Weinheim einmal mit echtem
+      Modell analysieren, Cache füllen
 - [ ] Jede Option unter 150 Sekunden
 - [ ] Zwei erfundene Wildcards (E5) durchspielen
 - [ ] Einen Bauschritt absichtlich scheitern lassen und den Rücksprung üben

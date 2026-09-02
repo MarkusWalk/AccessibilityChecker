@@ -7,6 +7,11 @@ export type Axis = 'verstaendlichkeit' | 'zugaenglichkeit';
 export type Severity = 'hoch' | 'mittel' | 'niedrig';
 export type Effort = 'klein' | 'mittel' | 'gross';
 
+// Rechteck im Seiten-Screenshot (Vollseite, CSS-Pixel, Ursprung oben links).
+// Wird vom Crawl über den Selektor erfasst. null, wenn kein Element
+// zuzuordnen war (z.B. Befunde auf Seitenebene wie fehlende Sprachangabe).
+export type Box = { x: number; y: number; width: number; height: number };
+
 export type Finding = {
 	id: string;
 	pageUrl: string;
@@ -15,11 +20,12 @@ export type Finding = {
 	severity: Severity;
 	excerpt: string; // die betroffene Stelle im Original
 	selector: string | null; // CSS-Pfad für den Screenshot-Viewer
-	machineDecidable: boolean; // E1: belegt oder Urteilssache
-	fromLegalSource: boolean; // E1: stammt der Satz aus einem Gesetz
-	legalSource: string | null; // E1: die Fundstelle, falls bekannt
+	box: Box | null; // E4 D: Lage der Stelle im Screenshot, in CSS-Pixeln der Vollseite
+	machineDecidable: boolean; // E2: belegt oder Ermessensfrage
+	fromLegalSource: boolean; // E2: stammt der Satz aus einem Gesetz
+	legalSource: string | null; // E2: die Fundstelle, falls bekannt
 	suggestion: string | null; // E4: fertiger Vorschlagstext
-	suggestionAlt: string | null; // E4: zweite Variante
+	suggestionAlt: string | null; // E5-Rückfall: zweite Variante
 	rationale: string | null; // E4: Begründung mit Regelbezug
 	effort: Effort; // E3: Priorisierung nach Aufwand
 };

@@ -250,7 +250,10 @@ function findeSatzlaenge(root: HTMLElement, pageUrl: string): Finding[] {
 						woerter > SATZLAENGE_SCHWELLWERT * 1.5 ? 'hoch' : 'mittel',
 						satz,
 						selectorFor(block),
-						'mittel'
+						'mittel',
+						// Ob ein Satz "zu lang" ist, ist Ermessenssache, kein belegbarer
+						// Fakt (E2 C) — anders als z.B. ein fehlender Alternativtext.
+						{ machineDecidable: false }
 					)
 				);
 			}
@@ -274,7 +277,9 @@ function findeNebensatztiefe(root: HTMLElement, pageUrl: string): Finding[] {
 						marker + kommata >= 5 ? 'hoch' : 'mittel',
 						satz,
 						selectorFor(block),
-						'mittel'
+						'mittel',
+						// Ermessensfrage, kein belegbarer Fakt (E2 C).
+						{ machineDecidable: false }
 					)
 				);
 			}
@@ -297,7 +302,9 @@ function findePassivanteil(root: HTMLElement, pageUrl: string): Finding[] {
 						treffer >= 2 ? 'hoch' : 'niedrig',
 						satz,
 						selectorFor(block),
-						'mittel'
+						'mittel',
+						// Ermessensfrage, kein belegbarer Fakt (E2 C).
+						{ machineDecidable: false }
 					)
 				);
 			}
@@ -320,7 +327,9 @@ function findeNominalstil(root: HTMLElement, pageUrl: string): Finding[] {
 						treffer >= 5 ? 'hoch' : 'mittel',
 						satz,
 						selectorFor(block),
-						'gross'
+						'gross',
+						// Ermessensfrage, kein belegbarer Fakt (E2 C).
+						{ machineDecidable: false }
 					)
 				);
 			}
@@ -347,7 +356,11 @@ function findeParagrafenOhneErklaerung(root: HTMLElement, pageUrl: string): Find
 						{
 							// Mechanisch erkennbar: Der Satz zitiert eine Rechtsquelle.
 							// legalSource bleibt die rohe Fundstelle, bis Schritt 4 sie
-							// bei Bedarf gegen die echte Norm prüft/ergänzt.
+							// bei Bedarf gegen die echte Norm prüft/ergänzt. Anders als die
+							// übrigen Verständlichkeits-Regeln ist der Verweis selbst
+							// belegbar (es gibt ihn oder nicht) — machineDecidable bleibt
+							// darum true, nur die Erklärung dazu ist Ermessenssache.
+							machineDecidable: true,
 							fromLegalSource: true,
 							legalSource: treffer[0]
 						}

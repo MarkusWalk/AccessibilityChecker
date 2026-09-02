@@ -34,17 +34,20 @@ Der Svelte-Dev-Server läuft die ganze Zeit. Jede Änderung erscheint sofort
 per Hot Reload. Arbeite deshalb in kleinen Stufen und speichere nach jeder,
 statt einen großen fertigen Wurf abzuliefern.
 
-Die Leitreihenfolge für eine Interface-Entscheidung:
+Die vier Stufen für jede Entscheidung, jede endet mit Speichern:
 
-1. Komponente einfügen, sie erscheint roh auf der Seite
-2. Zuschnitt und Platzierung im Layout
-3. Farben und Typografie aus dem Theme
-4. Interaktivität, sie tut etwas
+1. **Primitiv.** Etwas Rohes aus den echten Daten erscheint: eine schlichte
+   Liste, eine Tabelle, ein Textblock. Ungestylt, absichtlich.
+2. **Gestaltet.** Die vorbereitete Komponente aus `src/lib/assets/` löst das
+   Rohe ab, das Theme greift.
+3. **Besser.** Zuschnitt, Platz im Layout, Zähler, Zustände.
+4. **Klug.** Logik aus `src/lib/live/` oder ein Endpunkt wird angeschlossen.
 
-Das ist eine Richtschnur, kein Zwang. Du darfst Stufen zusammenziehen oder
-eine zusätzliche einschieben, wenn das Ergebnis dadurch schneller sichtbar
-wird. Pflicht ist nur: **nach jedem sichtbaren Zwischenschritt speichern.**
-Nie länger als 60 Sekunden ohne eine Änderung auf dem Bildschirm.
+Der Weg vom Primitiven zum Klugen ist Teil der Vorführung. Die fertige
+Lösung darf nie in einem Schritt auftauchen. Stufe 1 ist Pflicht, auch wenn
+sie nur zehn Sekunden dauert. Pflicht ist außerdem: **nach jedem sichtbaren
+Zwischenschritt speichern.** Nie länger als 60 Sekunden ohne eine Änderung
+auf dem Bildschirm.
 
 Ein Fehler auf dem Bildschirm ist besser als eine leere Seite. Wenn etwas
 klemmt, liefere den kleinstmöglichen lauffähigen Zustand, statt weiter zu
@@ -65,11 +68,12 @@ type Finding = {
   severity: 'hoch' | 'mittel' | 'niedrig'
   excerpt: string                 // die betroffene Stelle im Original
   selector: string | null         // CSS-Pfad für den Screenshot-Viewer
-  machineDecidable: boolean       // E1: belegt oder Urteilssache
-  fromLegalSource: boolean        // E1: stammt der Satz aus einem Gesetz
-  legalSource: string | null      // E1: die Fundstelle, falls bekannt
+  box: { x, y, width, height } | null   // E4 D: Lage im Vollseiten-Screenshot
+  machineDecidable: boolean       // E2: belegt oder Ermessensfrage
+  fromLegalSource: boolean        // E2: stammt der Satz aus einem Gesetz
+  legalSource: string | null      // E2: die Fundstelle, falls bekannt
   suggestion: string | null       // E4: fertiger Vorschlagstext
-  suggestionAlt: string | null    // E4: zweite Variante
+  suggestionAlt: string | null    // E5-Rückfall: zweite Variante
   rationale: string | null        // E4: Begründung mit Regelbezug
   effort: 'klein' | 'mittel' | 'gross'   // E3: Priorisierung nach Aufwand
 }
@@ -99,6 +103,17 @@ Während des Live-Builds gilt:
 Du darfst technisch alles anfassen. Die Absicherung läuft über Git. Aber jede
 Änderung außerhalb der aktuellen Entscheidung ist ein Risiko ohne Gegenwert.
 
+### Verhalten auf der Bühne
+
+Gilt für jeden Prompt, der mit "Das Publikum hat entschieden" beginnt oder
+erkennbar aus dem Live-Build stammt:
+
+- Antworte auf Deutsch, eine kurze Statuszeile je Stufe, keine Erklärungen,
+  keine Rückfragen. Der Verlauf ist für das Publikum sichtbar.
+- Kein `git commit`, kein `git tag`. Markus sichert selbst mit
+  `npm run tag`. Rollback-Punkte müssen sauber bleiben.
+- Bei Zeitüberschreitung bleibt der Teilzustand stehen. Nichts zurückbauen.
+
 ## Absicherung
 
 Nach jeder angenommenen Entscheidung wird der Stand markiert:
@@ -112,7 +127,8 @@ npm run rollback e1   # harter Rücksprung auf live/e1
 sein. Das wird in der Probe geübt, sonst nützt es nichts.
 
 Abbruchkriterium im Live-Betrieb: **150 Sekunden pro Bauschritt.** Danach
-bricht Markus ab und geht zur nächsten Entscheidung.
+bricht Markus ab und geht zur nächsten Entscheidung. Der Teilzustand bleibt
+auf dem Schirm.
 
 ## Die fünf Entscheidungen
 
@@ -121,11 +137,11 @@ live tippt. Kurzfassung:
 
 | | Frage | Wirkt auf |
 |---|---|---|
-| E1 | Was tut das System bei einem unverständlichen Satz aus einem Gesetz? | Logik, Filterung, Anzeige der Befunde |
-| E2 | Chat, Dashboard oder geführter Flow? | Der Archetyp der ganzen Oberfläche |
-| E3 | Priorisierung nach Reichweite, Schwere, Aufwand oder Lebenslage? | Sortierung und Gruppierung |
-| E4 | Fertiger Vorschlag, Vorschlag mit Begründung, nur Markierung, zwei Varianten? | Die Befund-Karte |
-| E5 | Wildcard aus dem Publikum | Offen |
+| E1 | Sie öffnen das Werkzeug. Was sehen Sie zuerst? Chat, Dashboard, Geführt, Bericht | Der Archetyp der ganzen Oberfläche |
+| E2 | Wo hört die Zuständigkeit des Systems auf? Nirgends, beim Gesetz, beim Ermessen, bei der Sprache | Modus je Befund: Vorschlag, Markierung, Frage |
+| E3 | Wie arbeiten Mitarbeitende die Ergebnisse durch? Reichweite, Schwere, Aufwand, Thema | Sortierung und Gruppierung |
+| E4 | Sie öffnen einen Befund. Welches Ergebnis liegt Ihnen vor? Text, Vorschlag mit Begründung, Markierung mit Frage, die Seite selbst mit Markierungen | Die Befund-Karte oder der Screenshot-Viewer |
+| E5 | Wildcard. Wünschen Sie sich etwas, das diese Anwendung zehnmal besser macht! | Offen |
 
 E5 ist unbekannt. Halte den Code so, dass ein zusätzliches sichtbares Feature
 in vier Minuten dazukommen kann.
@@ -137,11 +153,17 @@ src/
   lib/
     theme/          Unblock-AI-Tokens. Anfassen nur mit gutem Grund.
     assets/         Fertige Komponenten, noch nicht eingebunden.
-                    Chat, Dashboard, LiveMonitor, Sidebar,
-                    ScreenshotViewer, Button, FindingCard
-    live/           Was während des Builds entsteht
-    data/           Gecachte Bestände als JSON
+                    Chat, Dashboard, GuidedFlow, Report, LiveMonitor,
+                    Sidebar, ScreenshotViewer, FindingCard, Counter,
+                    Button, Badge, Tag
+    live/           Vorbereitete Logik für die Stufe "Klug":
+                    sort.ts (E3), scope.ts (E2), export.ts (E5)
+    data/           Gecachte Bestände als JSON, Weinheim ist der Start
     server/llm.ts   Modellanbindung, providerneutral, mit Plattencache
+    server/bestaende.ts   Zugriff auf Bestände, für Layout und /api/chat
+  routes/
+    +layout.server.ts     lädt den gewählten Bestand, ?bestand=<name>
+    api/chat/             Endpunkt für E1 A, nutzt llm.ts mit Cache
   routes/
 scripts/
   crawl.ts          Playwright-Crawl, schreibt Page[] und Screenshots
@@ -164,8 +186,9 @@ absichtlich unbenutzt.
 je Seite. `robots.txt` wird beachtet, Abstand zwischen Abrufen mindestens
 eine Sekunde, User-Agent nennt Zweck und Kontakt.
 
-**Prüfdaten.** Hybrid. Zwei bis drei Bestände liegen fertig als JSON in
-`src/lib/data/`. Zusätzlich läuft ab Minute 0 ein Crawl der vom Publikum
+**Prüfdaten.** Hybrid. Weinheim, Theilheim, Eiterfeld und ein Beispielbestand
+liegen fertig als JSON in `src/lib/data/`. Weinheim ist der Startbestand, die
+Umschaltung sitzt in der Kopfleiste. Zusätzlich läuft ab Minute 0 ein Crawl der vom Publikum
 genannten Adresse im Hintergrund. Was rechtzeitig fertig wird, kommt rein.
 Die Oberfläche muss mit beiden Quellen umgehen, ohne dass etwas umgebaut wird.
 
@@ -180,8 +203,12 @@ Das Unblock-AI-Theme aus dem Foliensatz gilt. Es liegt in `src/lib/theme/`.
 - Schrift: IBM Plex Sans
 - Ink `#161616`, Blau `#0F62FE`, Teal `#009D9A`, Purple `#8A3FFC`,
   Magenta `#9F1853`, Linie `#E0E0E0`, Tint `#EDF5FF`
-- Weiße Flächen, blaue Überschriften, klare Kanten, keine Schatten,
-  keine Farbverläufe
+- Weiße Flächen, Überschriften in Ink mit blauem Akzentwort, Kicker in
+  IBM Plex Mono, Versalien, gesperrt, blau. Klare Kanten, keine weichen
+  Schatten, keine Farbverläufe. Blaue Blockflächen dürfen einen harten
+  hellblauen Versatz haben, wie im Foliensatz.
+- Zusätzlich zur Palette nur die zwei Carbon-Blautöne `--color-blue-dark`
+  `#002D9C` und `--color-blue-light` `#A6C8FF` aus dem Foliensatz.
 - Pixel- und 8-Bit-Elemente sind das Erkennungszeichen. Sparsam einsetzen,
   als Band oder Marke, nie als Dekoration über die ganze Fläche.
 

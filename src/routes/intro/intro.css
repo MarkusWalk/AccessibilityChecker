@@ -1,0 +1,220 @@
+/*
+ * Stile des Splash-Screens vor dem Live-Build. Liegen als eigene Datei neben
+ * der Route, weil vier Szenenkomponenten sie teilen.
+ *
+ * Bewegung: alles in steps() oder ganzen Pixelschritten. Nichts gleitet,
+ * nichts weicht auf — 8-Bit statt Glätte.
+ */
+
+.intro {
+	position: relative;
+	height: 100dvh;
+	overflow: hidden;
+	background: var(--color-surface);
+	--intro-pad-x: clamp(2rem, 5vw, 6rem);
+	--intro-pad-y: clamp(1.5rem, 4vh, 3.5rem);
+	--intro-fuss: clamp(2.5rem, 6vh, 4rem);
+}
+
+/* Gemeinsame Bühne. align-content: center hält jede Szene senkrecht mittig,
+   auch bei 720px Höhe. */
+.szene {
+	height: 100%;
+	display: grid;
+	align-content: center;
+	padding: var(--intro-pad-y) var(--intro-pad-x) calc(var(--intro-pad-y) + var(--intro-fuss));
+}
+
+.szene-blau {
+	background: var(--color-blue);
+	color: var(--color-white);
+}
+
+.szene-weiss {
+	background: var(--color-surface);
+	color: var(--color-ink);
+}
+
+/* Kicker auf blauer Fläche: hell statt blau. */
+.szene-blau .kicker {
+	color: var(--color-blue-light);
+}
+
+.intro-h1 {
+	font-family: var(--font-sans);
+	font-weight: var(--font-weight-bold);
+	line-height: 0.98;
+	letter-spacing: -0.035em;
+	margin: 0;
+	text-wrap: balance;
+}
+
+.szene-blau .intro-h1 {
+	color: var(--color-white);
+}
+
+.h1-gross {
+	font-size: clamp(2.75rem, 6.4vw, 6.5rem);
+}
+
+.h1-mittel {
+	font-size: clamp(1.875rem, 3.2vw, 3.5rem);
+	line-height: 1.05;
+}
+
+/* Wort für Wort, hartes Einblenden. Der Versatz kommt per --i aus dem Markup. */
+.wort {
+	display: inline-block;
+	opacity: 0;
+	animation: wort-auf 1ms steps(1, end) both;
+	animation-delay: calc(var(--i, 0) * 110ms + var(--start, 0ms));
+}
+
+@keyframes wort-auf {
+	to {
+		opacity: 1;
+	}
+}
+
+/* Block-Cursor am Ende der Headline. */
+.cursor {
+	display: inline-block;
+	width: 0.42em;
+	height: 0.78em;
+	margin-left: 0.18em;
+	background: var(--color-blue-dark);
+	vertical-align: baseline;
+	opacity: 0;
+	animation:
+		wort-auf 1ms steps(1, end) both,
+		blink 900ms steps(1, end) infinite;
+	animation-delay: var(--start, 0ms), calc(var(--start, 0ms) + 1ms);
+}
+
+@keyframes blink {
+	0%,
+	49% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}
+
+/* Zeilen und Karten, die nacheinander erscheinen. */
+.stufe {
+	opacity: 0;
+	animation: wort-auf 1ms steps(1, end) both;
+	animation-delay: calc(var(--i, 0) * 120ms + var(--start, 0ms));
+}
+
+/* Karten fahren von unten ein — in sechs Sprüngen, nicht gleitend. */
+.einfahrt {
+	opacity: 0;
+	animation: einfahrt 360ms steps(6, end) both;
+	animation-delay: calc(var(--i, 0) * 200ms + var(--start, 0ms));
+}
+
+@keyframes einfahrt {
+	from {
+		opacity: 0;
+		transform: translateY(48px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Einmal kurz blau werden wie ein Cursor, dann Ruhe. */
+.blinker {
+	animation: karte-blink 640ms steps(1, end) 2 both;
+}
+
+@keyframes karte-blink {
+	0%,
+	49% {
+		background: var(--color-blue);
+		border-color: var(--color-blue);
+		color: var(--color-white);
+	}
+	50%,
+	100% {
+		background: var(--color-surface);
+		border-color: var(--color-line);
+		color: var(--color-ink);
+	}
+}
+
+/* Fußleiste: Fortschritt links, Tastenhinweis rechts. Liegt über der Szene,
+   damit die Bühne senkrecht mittig bleibt. */
+.intro-fuss {
+	position: absolute;
+	left: var(--intro-pad-x);
+	right: var(--intro-pad-x);
+	bottom: var(--intro-pad-y);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-4);
+	pointer-events: none;
+}
+
+.intro-fuss .hinweis {
+	margin: 0;
+	font-family: var(--font-mono);
+	font-size: clamp(0.7rem, 0.85vw, 0.875rem);
+	letter-spacing: var(--letter-spacing-kicker);
+	text-transform: uppercase;
+}
+
+.auf-blau .intro-fuss {
+	color: var(--color-blue-light);
+}
+
+.auf-weiss .intro-fuss {
+	color: var(--color-ink);
+	opacity: 0.55;
+}
+
+.fortschritt {
+	display: flex;
+	gap: 4px;
+}
+
+.fortschritt span {
+	display: block;
+	width: 14px;
+	height: 14px;
+	background: var(--color-line);
+}
+
+.auf-blau .fortschritt span {
+	background: var(--color-blue-dark);
+}
+
+.fortschritt span.aktiv {
+	background: var(--color-blue);
+}
+
+.auf-blau .fortschritt span.aktiv {
+	background: var(--color-white);
+}
+
+/* Ohne Bewegung: alles sofort da, keine Verzögerung, kein Blinken. */
+@media (prefers-reduced-motion: reduce) {
+	.intro *,
+	.intro *::before,
+	.intro *::after {
+		animation-delay: 0s !important;
+		animation-iteration-count: 1 !important;
+	}
+
+	.intro .wort,
+	.intro .stufe,
+	.intro .einfahrt,
+	.intro .cursor {
+		opacity: 1;
+	}
+}

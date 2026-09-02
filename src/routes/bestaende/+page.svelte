@@ -1,24 +1,10 @@
 <script lang="ts">
-	import type { Page } from '$lib/types';
-	import theilheim from '$lib/data/theilheim.json';
-	import eiterfeld from '$lib/data/eiterfeld.json';
-	import fallback from '$lib/data/fallback.json';
+	// Die Zahlen kommen aus dem Layout-Loader, nicht aus einem eigenen Import:
+	// so sieht diese Seite denselben Stand wie die Umschaltung in der Kopfleiste,
+	// inklusive eines Bestands, der erst während des Webinars fertig wird.
+	import type { PageData } from './$types';
 
-	type Bestand = { name: string; herkunft: string; pages: Page[] };
-
-	const bestaende: Bestand[] = [
-		{ name: 'Theilheim', herkunft: 'echter Crawl', pages: theilheim as Page[] },
-		{ name: 'Eiterfeld', herkunft: 'echter Crawl', pages: eiterfeld as Page[] },
-		{ name: 'Rückfallbestand', herkunft: 'handgebaut', pages: fallback as Page[] }
-	];
-
-	function findingCount(pages: Page[]): number {
-		return pages.reduce((n, p) => n + p.findings.length, 0);
-	}
-
-	function legalCount(pages: Page[]): number {
-		return pages.reduce((n, p) => n + p.findings.filter((f) => f.fromLegalSource).length, 0);
-	}
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -27,48 +13,56 @@
 
 <div class="page container">
 	<p class="kicker">Bestände</p>
-	<h1>Vorbereitete Bestände</h1>
-	<p class="hinweis">Zwei echte Crawls und ein Rückfallbestand, gecacht als JSON in <code>src/lib/data/</code>.</p>
+	<h1>Geprüfte <span class="akzent">Bestände</span></h1>
+	<p class="hinweis">
+		Jeder Bestand ist ein Haus mit vielen Seiten. „Öffnen“ legt ihn auf die Übersicht; die Adresse
+		merkt sich die Wahl.
+	</p>
 
-	<ul class="grid">
-		{#each bestaende as bestand (bestand.name)}
-			<li class="card">
-				<span class="tag">{bestand.herkunft}</span>
-				<h2>{bestand.name}</h2>
-				<dl>
-					<div>
-						<dt>Seiten</dt>
-						<dd>{bestand.pages.length}</dd>
-					</div>
-					<div>
-						<dt>Befunde</dt>
-						<dd>{findingCount(bestand.pages)}</dd>
-					</div>
-					<div>
-						<dt>aus Rechtsquelle</dt>
-						<dd>{legalCount(bestand.pages)}</dd>
-					</div>
-				</dl>
-			</li>
-		{/each}
-	</ul>
+	{#if data.bestaende.length === 0}
+		<div class="block-gestrichelt">
+			<p>Noch kein Bestand vorhanden. Sobald ein Crawl fertig ist, erscheint er hier.</p>
+		</div>
+	{:else}
+		<ul class="grid">
+			{#each data.bestaende as bestand (bestand.name)}
+				{@const istAktiv = bestand.name === data.bestand.name}
+				<li class="card" class:aktiv={istAktiv}>
+					<span class="tag">{bestand.live ? 'Live-Crawl' : 'gecachter Crawl'}</span>
+					<h2>{bestand.label}</h2>
+					<dl>
+						<div>
+							<dt>Seiten</dt>
+							<dd>{bestand.pages}</dd>
+						</div>
+						<div>
+							<dt>Hinweise</dt>
+							<dd>{bestand.findings}</dd>
+						</div>
+					</dl>
+					<p class="aktion">
+						{#if istAktiv}
+							<span class="offen">Geöffnet</span>
+						{:else}
+							<a class="oeffnen" href="/?bestand={bestand.name}">Öffnen</a>
+						{/if}
+					</p>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style>
 	h1 {
-		margin: 0 0 var(--space-2) 0;
+		margin: 0 0 var(--space-3) 0;
 	}
 
 	.hinweis {
-		margin: 0 0 var(--space-4) 0;
+		margin: 0 0 var(--space-5) 0;
+		max-width: 60ch;
 		color: var(--color-ink);
 		opacity: 0.7;
-	}
-
-	code {
-		font-family: monospace;
-		background: var(--color-surface-tint);
-		padding: 0 0.2rem;
 	}
 
 	.grid {
@@ -76,17 +70,32 @@
 		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-		gap: var(--space-3);
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: var(--space-4);
+	}
+
+	.card {
+		display: flex;
+		flex-direction: column;
+		padding: var(--space-4);
+	}
+
+	.card.aktiv {
+		border-color: var(--color-blue);
+		box-shadow: 8px 8px 0 0 var(--color-blue-light);
 	}
 
 	.tag {
 		display: inline-flex;
-		font-size: var(--font-size-small);
-		color: var(--color-accent);
+		align-self: flex-start;
+		font-family: var(--font-mono);
+		font-size: 0.625rem;
+		letter-spacing: var(--letter-spacing-kicker);
+		text-transform: uppercase;
+		color: var(--color-blue);
 		background: var(--color-surface-tint);
-		padding: 0.1rem var(--space-2);
-		margin-bottom: var(--space-2);
+		padding: var(--space-05) var(--space-2);
+		margin-bottom: var(--space-3);
 	}
 
 	h2 {
@@ -98,12 +107,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
-		margin: 0;
+		margin: 0 0 var(--space-4) 0;
 	}
 
 	dl > div {
 		display: flex;
 		justify-content: space-between;
+		align-items: baseline;
 		border-top: 1px solid var(--color-border);
 		padding-top: var(--space-1);
 	}
@@ -115,6 +125,37 @@
 
 	dd {
 		margin: 0;
+		font-family: var(--font-mono);
+		font-size: var(--font-size-h4);
 		font-weight: var(--font-weight-semibold);
+	}
+
+	.aktion {
+		margin: auto 0 0 0;
+	}
+
+	.oeffnen {
+		display: inline-block;
+		background: var(--color-blue);
+		color: var(--color-white);
+		text-decoration: none;
+		font-weight: var(--font-weight-semibold);
+		font-size: var(--font-size-small);
+		padding: var(--space-2) var(--space-3);
+		transition: background var(--motion-fast) var(--motion-ease);
+	}
+
+	.oeffnen:hover {
+		background: var(--color-accent-hover);
+		color: var(--color-white);
+	}
+
+	.offen {
+		display: inline-block;
+		font-family: var(--font-mono);
+		font-size: var(--font-size-small);
+		letter-spacing: 0.06em;
+		color: var(--color-blue-dark);
+		padding: var(--space-2) 0;
 	}
 </style>

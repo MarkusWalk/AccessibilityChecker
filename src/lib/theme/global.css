@@ -22,19 +22,25 @@ body {
 	font-weight: var(--font-weight-regular);
 }
 
+/* Foliensatz: fette Headlines in Ink, enger Zeilenabstand, negatives
+   Letterspacing. Das Blau liegt auf Kicker, Akzentwort und Linien. */
 h1,
 h2,
 h3,
 h4 {
 	color: var(--color-heading);
-	font-weight: var(--font-weight-semibold);
+	font-weight: var(--font-weight-bold);
 	line-height: var(--line-height-heading);
 	margin: 0 0 var(--space-3) 0;
-	letter-spacing: -0.01em;
+	letter-spacing: -0.02em;
 }
 
 h1 {
-	font-size: var(--font-size-h1);
+	/* Skaliert mit der Fensterbreite, damit die Headline bei 1024px nicht
+	   umbricht und bei 1600px die Wucht des Foliensatzes hat. */
+	font-size: clamp(var(--font-size-h1), 4.5vw, var(--font-size-display));
+	line-height: var(--line-height-display);
+	letter-spacing: var(--letter-spacing-display);
 }
 h2 {
 	font-size: var(--font-size-h2);
@@ -86,14 +92,85 @@ button {
 	}
 }
 
+/* Kicker wie auf den Folien: Monospace, Versalien, gesperrt, blau.
+   Beispiel: <p class="kicker">01 These</p> */
 .kicker {
 	display: inline-block;
+	font-family: var(--font-mono);
 	font-size: var(--font-size-small);
-	font-weight: var(--font-weight-semibold);
-	letter-spacing: 0.14em;
+	font-weight: var(--font-weight-medium);
+	letter-spacing: var(--letter-spacing-kicker);
 	text-transform: uppercase;
-	color: var(--color-accent-secondary);
-	margin: 0 0 var(--space-2) 0;
+	color: var(--color-kicker);
+	margin: 0 0 var(--space-3) 0;
+}
+
+/* Ein Wort der Headline in Blau: <h1>Will<span class="akzent">kommen</span></h1> */
+.akzent {
+	color: var(--color-blue);
+}
+
+/* Blaue Blockfläche mit hartem hellblauem Versatz dahinter. Kein weicher
+   Schatten, nur ein zweites Rechteck, um wenige Pixel verschoben. */
+.block-blau {
+	background: var(--color-blue);
+	color: var(--color-white);
+	padding: var(--space-4);
+	border-radius: var(--radius);
+	/* Harte Kante, kein Weichzeichnen: ein zweites Rechteck, 8px versetzt. */
+	box-shadow: 8px 8px 0 0 var(--color-blue-light);
+}
+
+.block-blau :is(h1, h2, h3, h4) {
+	color: var(--color-white);
+}
+
+.block-blau .akzent {
+	color: var(--color-blue-dark);
+}
+
+.block-blau .kicker {
+	color: var(--color-blue-light);
+}
+
+/* Hinweisfläche: gestrichelter Rahmen, weiße Fläche, keine Farbfüllung. */
+.block-gestrichelt {
+	border: 2px dashed var(--color-blue);
+	border-radius: var(--radius);
+	background: var(--color-surface);
+	padding: var(--space-4);
+}
+
+/* Reihe kleiner Quadrate als Zähler oder Fortschritt.
+   <p class="pixelreihe"><span></span><span class="leer"></span></p> */
+.pixelreihe {
+	display: flex;
+	gap: 3px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.pixelreihe > * {
+	display: block;
+	width: 10px;
+	height: 10px;
+	background: var(--color-blue);
+}
+
+.pixelreihe > .leer {
+	background: var(--color-line);
+}
+
+.pixelreihe > .voll {
+	background: var(--color-blue-dark);
+}
+
+/* Monospace-Zeile für Zähler und Stände, z.B. "08 / 16". */
+.mono {
+	font-family: var(--font-mono);
+	font-size: var(--font-size-small);
+	letter-spacing: 0.06em;
 }
 
 /* Gemeinsame Leserbreite/Außenabstand für Seiteninhalte. */

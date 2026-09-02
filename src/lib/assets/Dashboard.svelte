@@ -1,8 +1,9 @@
 <!--
-	E2 Archetyp B: Dashboard. Alle Seiten mit Befunden auf einen Blick.
-	Nur Props: pages, findingMode (wird an FindingCard weitergereicht),
-	onSelectPage. Kein eigener Fetch, keine eigene Sortierlogik — das
-	entsteht live bei E3.
+	E1 Archetyp B: Dashboard. Alle Seiten mit Befunden auf einen Blick.
+	Nur Props: pages, variant (wird an FindingCard weitergereicht als E4-
+	Anzeigevariante), onSelectPage. Kein eigener Fetch, keine eigene
+	Sortierlogik — das entsteht live bei E3 (sort.ts auf `pages` anwenden,
+	bevor sie hier reinkommen).
 -->
 <script lang="ts">
 	import type { Page, Finding } from '$lib/types';
@@ -11,11 +12,11 @@
 
 	let {
 		pages,
-		findingMode = 'vorschlag',
+		variant = 'text',
 		onSelectPage
 	}: {
 		pages: Page[];
-		findingMode?: 'vorschlag' | 'begruendet' | 'markierung' | 'zwei-varianten';
+		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
 		onSelectPage?: (url: string) => void;
 	} = $props();
 
@@ -51,7 +52,7 @@
 		<div class="finding-list">
 			{#each pages as page (page.url)}
 				{#each page.findings as finding (finding.id)}
-					<FindingCard {finding} mode={findingMode} />
+					<FindingCard {finding} {variant} />
 				{/each}
 			{/each}
 		</div>

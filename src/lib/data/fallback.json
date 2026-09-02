@@ -20,7 +20,13 @@
 				"suggestion": "Kurz erklärt: Wohngeld steht Ihnen zu, wenn Ihr Einkommen nicht für die Miete reicht — aber nur, wenn Sie nicht schon eine andere Unterstützung wie Bürgergeld bekommen. § 19 und § 20 Wohngeldgesetz legen das im Einzelnen fest.",
 				"suggestionAlt": "Was das für Sie bedeutet: Erhalten Sie bereits Bürgergeld nach § 27 SGB II, bekommen Sie die Wohnkosten meist schon darüber erstattet — ein zusätzlicher Wohngeldantrag ist dann in der Regel nicht nötig.",
 				"rationale": "Ein Verweis auf drei verschiedene Paragrafen ohne Erklärung verlangt von Antragstellenden, selbst zu klären, welche Vorschrift für ihren Fall gilt.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 60,
+					"width": 296,
+					"height": 14
+				}
 			},
 			{
 				"id": "fallback-2",
@@ -30,13 +36,19 @@
 				"severity": "hoch",
 				"excerpt": "Der Antrag ist vollständig mit allen erforderlichen Nachweisen, insbesondere dem aktuellen Mietvertrag, den letzten drei Gehaltsabrechnungen sowie einer Meldebescheinigung, innerhalb von vier Wochen nach Auszug bei der zuständigen Wohngeldstelle einzureichen.",
 				"selector": "main > section:nth-of-type(3) > p:nth-of-type(2)",
-				"machineDecidable": true,
+				"machineDecidable": false,
 				"fromLegalSource": false,
 				"legalSource": null,
 				"suggestion": "Reichen Sie den Antrag innerhalb von vier Wochen nach dem Auszug bei der Wohngeldstelle ein. Legen Sie dabei den aktuellen Mietvertrag, die letzten drei Gehaltsabrechnungen und eine Meldebescheinigung bei.",
 				"suggestionAlt": "Frist: vier Wochen nach Auszug. Nachweise: Mietvertrag, drei Gehaltsabrechnungen, Meldebescheinigung.",
 				"rationale": "Ein Satz mit fünf verschachtelten Angaben verlangt, Frist und drei verschiedene Nachweise gleichzeitig im Kopf zu behalten.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 90,
+					"width": 296,
+					"height": 14
+				}
 			},
 			{
 				"id": "fallback-3",
@@ -46,13 +58,19 @@
 				"severity": "mittel",
 				"excerpt": "Der Antrag wird durch die Wohngeldstelle geprüft und die Entscheidung wird schriftlich mitgeteilt.",
 				"selector": "main > section:nth-of-type(3) > p:nth-of-type(3)",
-				"machineDecidable": true,
+				"machineDecidable": false,
 				"fromLegalSource": false,
 				"legalSource": null,
 				"suggestion": "Die Wohngeldstelle prüft Ihren Antrag und teilt Ihnen die Entscheidung schriftlich mit.",
 				"suggestionAlt": "Sie erhalten die Entscheidung schriftlich, nachdem die Wohngeldstelle Ihren Antrag geprüft hat.",
 				"rationale": "Die Aktivform benennt die Wohngeldstelle als handelnde Stelle und macht damit den Ablauf konkreter.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 106,
+					"width": 296,
+					"height": 12
+				}
 			},
 			{
 				"id": "fallback-4",
@@ -68,7 +86,13 @@
 				"suggestion": "Alternativtext ergänzen, z. B. \"Vorschau des Antragsformulars für Wohngeld, zwei Seiten\".",
 				"suggestionAlt": "Kurzform: \"Antragsformular Wohngeld, Vorschau\".",
 				"rationale": "Ohne Alternativtext bleibt die Formularvorschau für Screenreader-Nutzende unzugänglich (WCAG 1.1.1).",
-				"effort": "klein"
+				"effort": "klein",
+				"box": {
+					"x": 12,
+					"y": 14,
+					"width": 60,
+					"height": 40
+				}
 			},
 			{
 				"id": "fallback-5",
@@ -84,7 +108,13 @@
 				"suggestion": "Linktext durch das Linkziel ersetzen, z. B. \"Antragsformular herunterladen (PDF)\".",
 				"suggestionAlt": "Alternativ: den Namen der verlinkten Wohngeldstelle als Linktext übernehmen.",
 				"rationale": "Screenreader-Nutzende springen häufig über eine Liste aller Linktexte — \"hier klicken\" sagt dort nichts aus.",
-				"effort": "klein"
+				"effort": "klein",
+				"box": {
+					"x": 12,
+					"y": 130,
+					"width": 80,
+					"height": 10
+				}
 			},
 			{
 				"id": "fallback-6",
@@ -100,7 +130,13 @@
 				"suggestion": "Sichtbares <label for=\"nettoeinkommen\"> ergänzen, das die Eingabe eindeutig benennt.",
 				"suggestionAlt": "Alternativ: den bisherigen Platzhaltertext durch eine dauerhaft sichtbare Beschriftung ersetzen.",
 				"rationale": "Ohne Beschriftung ist unklar, welcher Betrag erwartet wird — besonders bei Screenreadern und Spracheingabe.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 150,
+					"y": 150,
+					"width": 100,
+					"height": 14
+				}
 			}
 		]
 	},
@@ -125,7 +161,13 @@
 				"suggestion": "Kurz erklärt: Wie viel Elterngeld Sie bekommen, hängt davon ab, wie viel Sie vor der Geburt verdient haben. § 2 Abs. 1 BEEG legt genau fest, wie dieses Einkommen berechnet wird.",
 				"suggestionAlt": "Was das für Sie bedeutet: Je höher Ihr Einkommen vor der Geburt war, desto höher fällt in der Regel auch das Elterngeld aus — bis zu einer gesetzlichen Obergrenze.",
 				"rationale": "Der Gesetzesverweis benennt die Berechnungsgrundlage, ohne zu erklären, was das für die Höhe des Elterngeldes konkret bedeutet.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 20,
+					"width": 296,
+					"height": 14
+				}
 			},
 			{
 				"id": "fallback-8",
@@ -135,13 +177,19 @@
 				"severity": "mittel",
 				"excerpt": "Die Beantragung, die Prüfung der Unterlagen und die Auszahlung erfolgen durch die zuständige Elterngeldstelle nach Eingang der vollständigen Antragsunterlagen.",
 				"selector": "main > section:nth-of-type(2) > p:nth-of-type(1)",
-				"machineDecidable": true,
+				"machineDecidable": false,
 				"fromLegalSource": false,
 				"legalSource": null,
 				"suggestion": "Sobald Ihre Unterlagen vollständig vorliegen, prüft die Elterngeldstelle den Antrag und zahlt das Elterngeld aus.",
 				"suggestionAlt": "Die Elterngeldstelle bearbeitet Ihren Antrag, prüft die Unterlagen und zahlt anschließend aus.",
 				"rationale": "Drei Substantivierungen auf -ung verdichten den Ablauf zu Hauptwörtern und verschleiern, wer wann handelt.",
-				"effort": "gross"
+				"effort": "gross",
+				"box": {
+					"x": 12,
+					"y": 46,
+					"width": 296,
+					"height": 14
+				}
 			},
 			{
 				"id": "fallback-9",
@@ -157,7 +205,13 @@
 				"suggestion": "Zwischenüberschrift auf h3 setzen, damit die Gliederung lückenlos bleibt.",
 				"suggestionAlt": "Alternativ: eine zusätzliche h3-Ebene \"Besondere Nachweise\" einziehen.",
 				"rationale": "Screenreader-Nutzende navigieren über Überschriftenebenen; ein Sprung von h2 auf h4 wirkt wie eine fehlende Ebene.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 80,
+					"width": 200,
+					"height": 12
+				}
 			},
 			{
 				"id": "fallback-10",
@@ -173,7 +227,13 @@
 				"suggestion": "Erste Zeile als <th> auszeichnen, damit jede Frist ihrer Antragsart zugeordnet werden kann.",
 				"suggestionAlt": "Alternativ: zusätzlich scope=\"col\" auf den Kopfzellen setzen.",
 				"rationale": "Ohne <th> liest ein Screenreader nur lose Daten ohne erkennbaren Bezug zur jeweiligen Antragsart vor.",
-				"effort": "mittel"
+				"effort": "mittel",
+				"box": {
+					"x": 12,
+					"y": 110,
+					"width": 296,
+					"height": 50
+				}
 			}
 		]
 	},
@@ -198,7 +258,13 @@
 				"suggestion": "Kurz erklärt: Wir dürfen Ihre Daten verarbeiten, weil das für unsere Aufgabe als Behörde im öffentlichen Interesse notwendig ist. Das erlaubt Art. 6 Abs. 1 lit. e DSGVO.",
 				"suggestionAlt": "Was das für Sie bedeutet: Sie müssen dieser Verarbeitung nicht gesondert zustimmen, da sie zur Erfüllung einer öffentlichen Aufgabe erforderlich ist.",
 				"rationale": "Der Rechtsgrundlagen-Verweis ist für die Nachvollziehbarkeit wichtig, bleibt für Laien aber ohne Erklärung abstrakt.",
-				"effort": "klein"
+				"effort": "klein",
+				"box": {
+					"x": 12,
+					"y": 60,
+					"width": 296,
+					"height": 14
+				}
 			},
 			{
 				"id": "fallback-12",
@@ -214,7 +280,8 @@
 				"suggestion": "lang=\"de\" am <html>-Element ergänzen.",
 				"suggestionAlt": "Bei fremdsprachigen Teilbereichen zusätzlich ein lokales lang-Attribut auf dem jeweiligen Abschnitt setzen.",
 				"rationale": "Ohne Sprachauszeichnung wählen Vorlesehilfen möglicherweise die falsche Aussprache.",
-				"effort": "klein"
+				"effort": "klein",
+				"box": null
 			}
 		]
 	}

@@ -53,6 +53,9 @@ async function main() {
 	console.log(`Hintergrund-Crawl: ${startUrl} (max. ${maxPages} Seiten) -> Bestand "${name}"`);
 	await run('npx', ['tsx', 'scripts/crawl.ts', startUrl, '--max-pages', maxPages, '--name', name]);
 	await run('npx', ['tsx', 'scripts/analyze.ts', name]);
+	// Boxen (Finding.box) im selben Weg wie die statischen Bestände: zweiter
+	// kurzer Playwright-Durchlauf über scripts/boxes.ts, siehe dort.
+	await run('npx', ['tsx', 'scripts/boxes.ts', name]);
 
 	schreibeStatus({ crawled: Number(maxPages), total: Number(maxPages), currentUrl: null, errors: 0, done: true });
 	console.log(`Fertig. Bestand liegt unter src/lib/data/${name}.json`);

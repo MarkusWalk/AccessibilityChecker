@@ -1,7 +1,7 @@
 <!--
-	E2 Archetyp A: Chat. Man befragt den Bestand. Nur Props: messages,
-	onSend. Kein eigener Modellaufruf hier — die Anbindung an echte
-	Antworten entsteht live (Stufe 4 aus CLAUDE.md).
+	E1 Archetyp A: Chat. Man befragt den Bestand. Nur Props: messages,
+	onSend. Kein eigener Modellaufruf hier — die Anbindung an
+	`/api/chat` entsteht live (Stufe 4 aus CLAUDE.md).
 -->
 <script lang="ts">
 	let {

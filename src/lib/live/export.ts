@@ -1,7 +1,7 @@
 // Vorbereitung für einen wahrscheinlichen E5-Wunsch: Export der Befunde als
 // CSV oder Markdown. Ungenutzt, bis live eine Export-Schaltfläche entsteht —
-// dann reicht ein Button, der eine dieser Funktionen aufruft und das
-// Ergebnis als Datei anbietet.
+// dann reicht ein Button, der `toCsv`/`toMarkdown` aufruft und das Ergebnis
+// mit `download()` als Datei anbietet.
 
 import type { Page, Finding } from '$lib/types';
 
@@ -14,7 +14,7 @@ function csvFeld(wert: string | number | boolean | null): string {
 	return `"${text.replace(/"/g, '""')}"`;
 }
 
-export function alsCsv(pages: Page[]): string {
+export function toCsv(pages: Page[]): string {
 	const spalten = [
 		'seite',
 		'achse',
@@ -33,7 +33,7 @@ export function alsCsv(pages: Page[]): string {
 	return [spalten.join(','), ...zeilen].join('\n');
 }
 
-export function alsMarkdown(pages: Page[]): string {
+export function toMarkdown(pages: Page[]): string {
 	const zeilen: string[] = ['# Befunde', ''];
 	for (const page of pages) {
 		if (page.findings.length === 0) continue;
@@ -46,4 +46,20 @@ export function alsMarkdown(pages: Page[]): string {
 		zeilen.push('');
 	}
 	return zeilen.join('\n');
+}
+
+// Löst im Browser einen Datei-Download aus. Läuft nur clientseitig (Aufruf
+// aus einem Button-Handler) — ohne `document` (z.B. während SSR importiert,
+// aber nicht ausgeführt) passiert nichts.
+export function download(filename: string, text: string): void {
+	if (typeof document === 'undefined') return;
+	const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
 }

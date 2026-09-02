@@ -3,22 +3,35 @@
 	import '$lib/theme/global.css';
 	import Topbar from '$lib/theme/Topbar.svelte';
 	import Footer from '$lib/theme/Footer.svelte';
+	import { page } from '$app/state';
+	import type { Snippet } from 'svelte';
+	import type { LayoutData } from './$types';
 
-	let { children } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	// Der Splash-Screen vor dem Live-Build ist Vollbild: dort trägt die Seite
+	// weder Kopfleiste noch Fußbereich.
+	const blank = $derived(page.url.pathname.startsWith('/intro'));
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<a class="skip-link" href="#hauptinhalt">Zum Inhalt springen</a>
+{#if !blank}
+	<a class="skip-link" href="#hauptinhalt">Zum Inhalt springen</a>
+{/if}
 
 <div class="shell">
-	<Topbar />
+	{#if !blank}
+		<Topbar bestaende={data.bestaende} aktiv={data.bestand.name} />
+	{/if}
 	<main id="hauptinhalt">
 		{@render children()}
 	</main>
-	<Footer />
+	{#if !blank}
+		<Footer />
+	{/if}
 </div>
 
 <style>

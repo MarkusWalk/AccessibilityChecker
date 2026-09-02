@@ -1,6 +1,7 @@
 <!--
-	E2 Archetyp C: Geführter Flow. Eine Seite nach der anderen. Nur Props:
-	pages, findingMode, index (kontrolliert von außen), onIndexChange.
+	E1 Archetyp C: Geführter Flow. Eine Seite nach der anderen. Nur Props:
+	pages, variant (E4-Anzeigevariante, an FindingCard weitergereicht),
+	index (kontrolliert von außen), onIndexChange.
 -->
 <script lang="ts">
 	import type { Page } from '$lib/types';
@@ -10,12 +11,12 @@
 
 	let {
 		pages,
-		findingMode = 'vorschlag',
+		variant = 'text',
 		index = 0,
 		onIndexChange
 	}: {
 		pages: Page[];
-		findingMode?: 'vorschlag' | 'begruendet' | 'markierung' | 'zwei-varianten';
+		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
 		index?: number;
 		onIndexChange?: (index: number) => void;
 	} = $props();
@@ -38,11 +39,11 @@
 		</header>
 
 		<div class="flow-body">
-			<ScreenshotViewer src={seite.screenshot} alt="Screenshot: {seite.title}" />
+			<ScreenshotViewer page={seite} />
 
 			<div class="findings">
 				{#each seite.findings as finding (finding.id)}
-					<FindingCard {finding} mode={findingMode} />
+					<FindingCard {finding} {variant} />
 				{:else}
 					<p class="leer">Keine Befunde auf dieser Seite.</p>
 				{/each}
