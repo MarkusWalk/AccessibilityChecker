@@ -1,9 +1,25 @@
-<!-- Szene 2: Was gebaut wird. Zwei Achsen, zwei Blöcke. -->
+<!--
+	Szene 2: Was gebaut wird. Was das Werkzeug ist, was es liefert, und wie es
+	sich einordnet. Drei Blöcke: prüfen, liefern, nicht sein.
+-->
 <script lang="ts">
 	let { bestand = 'Weinheim', seiten = 50 }: { bestand?: string; seiten?: number } = $props();
 
-	const verstaendlichkeit = ['Schachtelsätze', 'Passivketten', 'Paragrafen ohne Erklärung'];
-	const zugaenglichkeit = ['Alternativtexte', 'Überschriftenstruktur', 'Linktexte wie „hier klicken“'];
+	const prueft = [
+		'Verständlichkeit: Schachtelsätze, Passivketten, Paragrafen ohne Erklärung',
+		'Zugänglichkeit: Alternativtexte, Überschriften, Linktexte wie „hier klicken“',
+		'Nicht eine Seite, sondern den ganzen Auftritt'
+	];
+	const liefert = [
+		'Eine Arbeitsliste: Stelle, Hinweis, Vorschlag',
+		'Eine Reihenfolge, womit die Redaktion anfängt',
+		'Eine Antwort, wie weit das System selbst gehen darf'
+	];
+	const nicht = [
+		'Kein Konformitätsnachweis nach BITV',
+		'Keine Note, keine Punktzahl für ein Haus',
+		'Ein Prototyp: beantwortet Fragen, wird danach weggeworfen'
+	];
 </script>
 
 <section class="szene szene-weiss">
@@ -11,57 +27,89 @@
 	<h1 class="intro-h1 h1-mittel">
 		Ein <span class="akzent">Prüfwerkzeug</span> für den Webauftritt einer Behörde.
 	</h1>
+	<p class="lead stufe" style="--i: 0; --start: 120ms">
+		Es liest die Seiten einer Kommune, findet Stellen, die Menschen ausschließen oder nicht
+		verstehen, und macht daraus eine Arbeitsliste für die Redaktion. Mit KI, aber nach Regeln,
+		die das Haus selbst setzt.
+	</p>
 
 	<div class="spalten">
-		<div class="block-blau achse">
-			<p class="kicker">Verständlichkeit</p>
+		<div class="block-blau feld">
+			<p class="kicker">Was es prüft</p>
 			<ul>
-				{#each verstaendlichkeit as zeile, i (zeile)}
-					<li class="stufe" style="--i: {i}; --start: 200ms">{zeile}</li>
+				{#each prueft as zeile, i (zeile)}
+					<li class="stufe" style="--i: {i}; --start: 320ms">{zeile}</li>
 				{/each}
 			</ul>
 		</div>
 
-		<div class="block-gestrichelt achse">
-			<p class="kicker">Zugänglichkeit</p>
+		<div class="block-linie feld">
+			<p class="kicker">Was es liefert</p>
 			<ul>
-				{#each zugaenglichkeit as zeile, i (zeile)}
-					<li class="stufe" style="--i: {i}; --start: 560ms">{zeile}</li>
+				{#each liefert as zeile, i (zeile)}
+					<li class="stufe" style="--i: {i}; --start: 680ms">{zeile}</li>
+				{/each}
+			</ul>
+		</div>
+
+		<div class="block-gestrichelt feld">
+			<p class="kicker">Was es nicht ist</p>
+			<ul>
+				{#each nicht as zeile, i (zeile)}
+					<li class="stufe" style="--i: {i}; --start: 1040ms">{zeile}</li>
 				{/each}
 			</ul>
 		</div>
 	</div>
 
-	<p class="fuss stufe" style="--i: 0; --start: 1000ms">
-		Geprüft wird ein ganzer Bestand. Heute: <strong>{bestand}, {seiten} Seiten.</strong>
+	<p class="fuss stufe" style="--i: 0; --start: 1500ms">
+		Heute: <strong>{bestand}, {seiten} Seiten.</strong> Das Werkzeug beantwortet die Frage, ob
+		das eine Aufgabe für KI ist, und welche Entscheidungen sie dem Haus abverlangt.
 	</p>
 </section>
 
 <style>
 	h1 {
 		max-width: 26ch;
-		margin-bottom: clamp(1.25rem, 4vh, 2.75rem);
+		margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
+	}
+
+	.lead {
+		max-width: 62ch;
+		margin: 0 0 clamp(1rem, 3.5vh, 2.25rem) 0;
+		font-size: clamp(1rem, 1.35vw, 1.4rem);
+		line-height: 1.4;
+		color: var(--color-ink);
 	}
 
 	.spalten {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: clamp(1.5rem, 4vw, 3.5rem);
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: clamp(1.25rem, 3vw, 2.75rem);
 		align-items: stretch;
 	}
 
-	.achse {
+	.feld {
 		/* Platz für den harten Versatz rechts und unten. */
 		margin: 0 12px 12px 0;
-		padding: clamp(1.25rem, 3.2vh, 2.25rem);
-		min-height: clamp(12rem, 30vh, 18rem);
+		padding: clamp(1rem, 2.6vh, 1.75rem);
+		min-height: clamp(11rem, 30vh, 17rem);
 		display: flex;
 		flex-direction: column;
 	}
 
-	/* Gleiche Innenkante wie beim gestrichelten Block gegenüber. */
-	.block-blau.achse {
+	/* Gleiche Innenkante wie bei den Blöcken daneben. */
+	.block-blau.feld {
 		border: 2px solid var(--color-blue);
+	}
+
+	.block-linie {
+		border: 2px solid var(--color-ink);
+		background: var(--color-surface);
+	}
+
+	.block-linie .kicker {
+		color: var(--color-ink);
 	}
 
 	ul {
@@ -70,24 +118,38 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: clamp(0.5rem, 1.8vh, 1.1rem);
+		gap: clamp(0.5rem, 1.6vh, 1rem);
 		justify-content: center;
 		flex: 1;
 	}
 
 	li {
-		font-size: clamp(1.05rem, 1.75vw, 1.75rem);
+		font-size: clamp(0.95rem, 1.25vw, 1.3rem);
 		font-weight: var(--font-weight-semibold);
-		letter-spacing: -0.015em;
-		line-height: 1.25;
+		letter-spacing: -0.01em;
+		line-height: 1.3;
+		padding-left: 1.1em;
+		text-indent: -1.1em;
 	}
 
-	.block-gestrichelt li {
+	li::before {
+		content: '';
+		display: inline-block;
+		width: 0.5em;
+		height: 0.5em;
+		margin-right: 0.6em;
+		vertical-align: 0.1em;
+		background: currentColor;
+	}
+
+	.block-gestrichelt li,
+	.block-linie li {
 		color: var(--color-ink);
 	}
 
 	.fuss {
-		margin: clamp(1.25rem, 4vh, 2.5rem) 0 0 0;
+		max-width: 70ch;
+		margin: clamp(1rem, 3.5vh, 2.25rem) 0 0 0;
 		font-size: clamp(0.95rem, 1.15vw, 1.25rem);
 	}
 
