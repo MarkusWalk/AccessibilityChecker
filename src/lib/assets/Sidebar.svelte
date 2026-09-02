@@ -1,6 +1,9 @@
 <!--
-	Seitenliste für Dashboard/GuidedFlow. Nur Props: pages, selectedUrl,
-	onSelect. Holt sich nichts selbst.
+	Seitenliste, z.B. für Dashboard/GuidedFlow oder als linke Spalte von
+	Arbeitsplatz.svelte. Nur Props: pages, selectedUrl, onSelect. Holt sich
+	nichts selbst. Füllt die Breite/Höhe des umgebenden Containers (z.B. die
+	18rem-Spalte aus der .werkzeug-Utility) statt einer eigenen festen
+	Breite vorzugeben.
 -->
 <script lang="ts">
 	import type { Page } from '$lib/types';
@@ -48,7 +51,9 @@
 <style>
 	.sidebar {
 		border-right: 1px solid var(--color-border);
-		width: 260px;
+		width: 100%;
+		height: 100%;
+		min-height: 0;
 		overflow-y: auto;
 	}
 

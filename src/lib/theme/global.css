@@ -193,3 +193,37 @@ button {
 .card:hover {
 	border-color: var(--color-accent);
 }
+
+/* Arbeitsplatz-Layout: feste Sidebar links, Rest rechts — für
+   Arbeitsplatz.svelte (der Rahmen für die E1-Archetypen). Unter 60rem
+   Breite fällt die Sidebar über den Inhalt statt daneben.
+   <div class="werkzeug"><nav>…</nav><div>…</div></div> */
+.werkzeug {
+	display: grid;
+	grid-template-columns: 18rem 1fr;
+	gap: var(--space-4);
+	min-height: 0;
+}
+
+@media (max-width: 60rem) {
+	.werkzeug {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Flex-Spalte, die in einem begrenzt hohen Grid-/Flex-Container nicht über
+   ihre Kinder hinauswächst. `min-height: 0` auf den Kindern ist nötig,
+   damit sie selbst scrollen statt den Container zu sprengen (der Grund für
+   den Layoutbruch, bei dem der Chat auf 0px kollabierte, war ein fehlendes
+   min-height: 0 in genau dieser Kette).
+   <div class="spalte"><div>oben, scrollt selbst</div><div>unten</div></div> */
+.spalte {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-height: 0;
+}
+
+.spalte > * {
+	min-height: 0;
+}

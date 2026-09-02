@@ -2,6 +2,13 @@
 	E1 Archetyp A: Chat. Man befragt den Bestand. Nur Props: messages,
 	onSend. Kein eigener Modellaufruf hier — die Anbindung an
 	`/api/chat` entsteht live (Stufe 4 aus CLAUDE.md).
+
+	Füllt die Höhe seines Containers (z.B. `haupt` in Arbeitsplatz.svelte)
+	vollständig, `.verlauf` scrollt für sich — dafür braucht der Container
+	selbst eine begrenzte Höhe plus `min-height: 0` in der Kette (siehe
+	.werkzeug/.spalte in global.css), sonst kollabiert der Chat auf 0px in
+	einer Flex-/Grid-Zeile. Keine eigene max-width mehr (war 640px, brach
+	genau das) — bei Bedarf von außen über --chat-max-width begrenzen.
 -->
 <script lang="ts">
 	let {
@@ -41,11 +48,13 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		max-width: 640px;
+		min-height: 0;
+		max-width: var(--chat-max-width, none);
 	}
 
 	.verlauf {
 		flex: 1;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);

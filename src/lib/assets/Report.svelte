@@ -1,8 +1,10 @@
 <!--
 	E1 Archetyp D: Bericht. Ein Dokument zum Lesen und Weiterleiten, wie man
 	es aus Prüfungen kennt — kein Chat, kein Dashboard, kein geführter Flow.
-	Nur Props: pages, bestandLabel. Kein eigener Fetch, kein State.
-	Druckbar (@media print).
+	Props: pages, bestandLabel, scopeOption (E2, Default 'nirgends' — je
+	Befund wird scopeFor(f, scopeOption) berechnet: bei 'markierung' steht
+	die Fundstelle statt eines Vorschlags, bei 'frage' die Frage aus
+	questionFor()). Kein eigener Fetch, kein State. Druckbar (@media print).
 
 	Einsatz in vier Stufen:
 	1. Primitiv: <Report {pages} bestandLabel="Weinheim" /> direkt in den
@@ -11,19 +13,22 @@
 	   greift bereits über die Klassen unten).
 	3. Besser: eine Druck-/Download-Schaltfläche daneben (window.print()
 	   bzw. download() aus export.ts).
-	4. Klug: `pages` vorher mit einer Funktion aus sort.ts ordnen/gruppieren,
-	   bevor sie hier reinkommen — der Bericht folgt dann derselben
-	   Reihenfolge wie die übrige Oberfläche.
+	4. Klug: `pages` vorher mit einer Funktion aus sort.ts ordnen/gruppieren
+	   und `scopeOption` aus der E2-Entscheidung setzen — der Bericht folgt
+	   dann derselben Reihenfolge/Zuständigkeit wie die übrige Oberfläche.
 -->
 <script lang="ts">
 	import type { Page, Axis } from '$lib/types';
+	import { scopeFor, questionFor, type ScopeOption } from '$lib/live/scope';
 
 	let {
 		pages,
-		bestandLabel
+		bestandLabel,
+		scopeOption = 'nirgends'
 	}: {
 		pages: Page[];
 		bestandLabel: string;
+		scopeOption?: ScopeOption;
 	} = $props();
 
 	const heute = new Date().toLocaleDateString('de-DE', {
@@ -80,11 +85,16 @@
 			<p class="url">{page.url}</p>
 
 			{#each page.findings as f (f.id)}
+				{@const mode = scopeFor(f, scopeOption)}
 				<p class="finding">
 					<span class="regel">{f.rule}</span>
 					<span class="achse">({achseLabel[f.axis]})</span>
 					— {f.excerpt}
-					{#if f.suggestion}
+					{#if mode === 'markierung'}
+						<br /><span class="fundstelle">Fundstelle: {f.legalSource ?? 'Gesetzestext'}</span>
+					{:else if mode === 'frage'}
+						<br /><span class="frage">{questionFor(f)}</span>
+					{:else if f.suggestion}
 						<br /><span class="suggestion">Vorschlag: {f.suggestion}</span>
 					{/if}
 				</p>
@@ -186,6 +196,16 @@
 
 	.suggestion {
 		color: var(--color-accent-secondary);
+	}
+
+	.fundstelle {
+		font-style: italic;
+		opacity: 0.8;
+	}
+
+	.frage {
+		color: var(--color-accent-secondary);
+		font-weight: var(--font-weight-medium);
 	}
 
 	.leer {

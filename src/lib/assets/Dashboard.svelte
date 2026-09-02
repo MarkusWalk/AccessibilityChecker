@@ -1,22 +1,27 @@
 <!--
 	E1 Archetyp B: Dashboard. Alle Seiten mit Befunden auf einen Blick.
 	Nur Props: pages, variant (wird an FindingCard weitergereicht als E4-
-	Anzeigevariante), onSelectPage. Kein eigener Fetch, keine eigene
+	Anzeigevariante), scopeOption (E2, Default 'nirgends' — je Befund wird
+	scopeFor(f, scopeOption) berechnet und als `mode` an FindingCard
+	weitergereicht), onSelectPage. Kein eigener Fetch, keine eigene
 	Sortierlogik — das entsteht live bei E3 (sort.ts auf `pages` anwenden,
 	bevor sie hier reinkommen).
 -->
 <script lang="ts">
 	import type { Page, Finding } from '$lib/types';
+	import { scopeFor, type ScopeOption } from '$lib/live/scope';
 	import Badge from './Badge.svelte';
 	import FindingCard from './FindingCard.svelte';
 
 	let {
 		pages,
 		variant = 'text',
+		scopeOption = 'nirgends',
 		onSelectPage
 	}: {
 		pages: Page[];
 		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
+		scopeOption?: ScopeOption;
 		onSelectPage?: (url: string) => void;
 	} = $props();
 
@@ -52,7 +57,7 @@
 		<div class="finding-list">
 			{#each pages as page (page.url)}
 				{#each page.findings as finding (finding.id)}
-					<FindingCard {finding} {variant} />
+					<FindingCard {finding} {variant} mode={scopeFor(finding, scopeOption)} />
 				{/each}
 			{/each}
 		</div>

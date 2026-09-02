@@ -81,10 +81,40 @@ const NICHTSSAGENDE_LINKTEXTE = [
 
 // --- Zugänglichkeit ---------------------------------------------------
 
+// Navigations-/Rahmenbereiche: Menüs, Kopf- und Fußzeilen wiederholen sich
+// auf jeder Seite eines Bestands identisch — Alt-Text- und Linktext-Befunde
+// dort vervielfachen sich rein durch die Seitenzahl, ohne neue Information
+// zu liefern (bei Weinheim allein 1771 von 2300 Befunden). Elemente in
+// diesen Bereichen werden darum von beiden Regeln ausgenommen; sie bleiben
+// im übrigen Seiteninhalt (main, Artikeltext, Formulare) uneingeschränkt
+// wirksam. MENU_CONTAINER_MUSTER fängt zusätzlich Fälle ohne semantisches
+// Tag/role ab (z.B. <div class="mainnav">), wie in vielen Kommunal-CMS
+// üblich.
+// Teilstring-Treffer statt Wortgrenzen: Klassennamen sind oft
+// zusammengesetzt (z.B. "mainnav", "site-nav", "topnav"), \b\bnav\b\b
+// würde solche Fälle verpassen, weil "nav" dort nicht als eigenes Wort
+// steht.
+const MENU_CONTAINER_MUSTER =
+	/nav|menu|menue|breadcrumb|brotkrumen|sitemap|hauptnavigation|seitennavigation|metanav/i;
+
+function istInNavigationsBereich(el: HTMLElement): boolean {
+	let node: HTMLElement | null = el;
+	while (node && node.tagName) {
+		const tag = node.tagName.toLowerCase();
+		if (tag === 'nav' || tag === 'header' || tag === 'footer') return true;
+		const role = node.getAttribute('role')?.toLowerCase();
+		if (role && ['navigation', 'banner', 'contentinfo'].includes(role)) return true;
+		const marker = `${node.getAttribute('class') ?? ''} ${node.getAttribute('id') ?? ''}`;
+		if (MENU_CONTAINER_MUSTER.test(marker)) return true;
+		node = node.parentNode as HTMLElement | null;
+	}
+	return false;
+}
+
 function findeBilderOhneAlt(root: HTMLElement, pageUrl: string): Finding[] {
 	return root
 		.querySelectorAll('img')
-		.filter((img) => !img.getAttribute('alt')?.trim())
+		.filter((img) => !img.getAttribute('alt')?.trim() && !istInNavigationsBereich(img))
 		.map((img) =>
 			makeFinding(
 				pageUrl,
@@ -103,7 +133,8 @@ function findeNichtssagendeLinktexte(root: HTMLElement, pageUrl: string): Findin
 		.querySelectorAll('a')
 		.filter((a) => {
 			const text = a.textContent.trim().toLowerCase();
-			return text.length === 0 || NICHTSSAGENDE_LINKTEXTE.includes(text);
+			const nichtssagend = text.length === 0 || NICHTSSAGENDE_LINKTEXTE.includes(text);
+			return nichtssagend && !istInNavigationsBereich(a);
 		})
 		.map((a) =>
 			makeFinding(
@@ -233,7 +264,15 @@ function splitSaetze(text: string): string[] {
 }
 
 function textBloecke(root: HTMLElement): HTMLElement[] {
-	return root.querySelectorAll('p,li,td,dd').filter((el) => el.textContent.trim().length > 0);
+	// Wie bei Bildern/Linktexten: Text in Nav-/Rahmenbereichen ausschließen.
+	// Ohne diesen Filter liest z.B. ein Mega-Menü ("<nav><li><a>Aktuelles
+	// <span>News, Verkehrsinfos, Bekanntmachungen</span></a></li>...</nav>")
+	// als ein einziger, langer Fließtext-Satz — und erzeugt so auf jeder
+	// Seite eines Bestands denselben satzlaenge-/nebensatztiefe-/nominalstil-
+	// Befund erneut, obwohl gar kein Artikeltext betroffen ist.
+	return root
+		.querySelectorAll('p,li,td,dd')
+		.filter((el) => el.textContent.trim().length > 0 && !istInNavigationsBereich(el));
 }
 
 function findeSatzlaenge(root: HTMLElement, pageUrl: string): Finding[] {

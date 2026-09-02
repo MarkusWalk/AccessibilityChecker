@@ -52,18 +52,27 @@ Die Prompts unten verlangen diese Stufen ausdrücklich.
   Prüfungen kennt.
 
 **Im Code.** Die größte sichtbare Veränderung. Bausteine: `Chat.svelte`,
-`Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte`. Die Daten kommen
-aus dem Layout-Loader (`data.bestand` auf der Startseite). Bei A antwortet
-der vorbereitete Endpunkt `/api/chat`.
+`Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte`. Der Rahmen für
+alle vier ist `Arbeitsplatz.svelte`: Seitenliste links, der Archetyp rechts
+oben, darunter ein Panel für Befundkarten. Das Panel ist der Anker für E2
+bis E4, egal welcher Archetyp gewinnt. Die Daten kommen aus dem
+Layout-Loader (`data.bestand` auf der Startseite). Bei A antwortet der
+vorbereitete Endpunkt `/api/chat`, der Verlauf wird als `history`
+mitgeschickt.
 
 **Prompt (Beispiel für A):**
 
 > Das Publikum hat entschieden: Chat. Stufe 1: Zeig auf der Startseite erst
-> eine rohe Liste der Seiten mit ihrer Befundzahl aus `data.bestand`,
-> speichern. Stufe 2: Setz `Chat.svelte` aus `src/lib/assets/` an die Stelle,
-> speichern. Stufe 3: Zuschnitt, Chat füllt den Canvas, Seitenliste als
-> Sidebar daneben, speichern. Stufe 4: `onSend` an `/api/chat` anbinden,
+> eine rohe Liste der Seiten mit ihrer Befundzahl aus `data.bestand.pages`,
+> speichern. Stufe 2: Setz `Arbeitsplatz.svelte` aus `src/lib/assets/` ein
+> und `Chat.svelte` in den Bereich `haupt`, speichern. Stufe 3: Ins Panel
+> darunter die Befunde der gewählten Seite als `FindingCard`-Liste,
+> speichern. Stufe 4: `onSend` an `/api/chat` anbinden, mit `history`,
 > Antworten erscheinen im Verlauf, speichern.
+
+**Probelauf 2026-09-02:** 62 Sekunden ohne den Arbeitsplatz-Rahmen. Der
+Rahmen kam danach dazu, damit E2 bis E4 nicht erst eine Kartenliste bauen
+müssen.
 
 **Erwartete Bauzeit:** 120 bis 150 Sekunden.
 
@@ -82,21 +91,30 @@ der vorbereitete Endpunkt `/api/chat`.
 
 **Im Code.** `src/lib/live/scope.ts` weist jedem Befund einen Modus zu:
 `vorschlag`, `markierung` oder `frage`. Die Felder `fromLegalSource`,
-`legalSource`, `machineDecidable` und `axis` sind gefüllt. Sichtbar wird es
-über die Karte (Vorschlag verschwindet, Markierung oder Frage erscheint) und
-über den Zähler im Kopf: "N Vorschläge · M Markierungen · K Fragen".
+`legalSource`, `machineDecidable` und `axis` sind gefüllt. Jeder Archetyp
+und `FindingCard` nehmen `scopeOption` bzw. `mode` als Prop. Sichtbar wird
+es über die Karte (Vorschlag verschwindet, Markierung oder Frage erscheint)
+und über den Zähler: "N Vorschläge · M Markierungen · K Fragen".
 
 Der Impact kommt aus A. Wählt der Raum A, steht ein umformulierter Paragraf
 auf dem Schirm. Bei B bis D verschwinden ganze Gruppen von Vorschlägen.
 
 **Prompt (Beispiel für B):**
 
-> Das Publikum hat entschieden: Beim Gesetz hört es auf. Stufe 1: Zeig neben
-> jedem Befund roh den Wert von `fromLegalSource`, speichern. Stufe 2: Nutz
-> `scopeFor(finding, 'gesetz')` aus `src/lib/live/scope.ts` und gib der
-> Karte den Modus, speichern. Stufe 3: Bei Modus `markierung` die Fundstelle
-> aus `legalSource` als Tag zeigen, speichern. Stufe 4: Zähler im Kopf mit
-> `countScopes`, speichern.
+> Das Publikum hat entschieden: Beim Gesetz hört es auf. Stufe 1: Schreib
+> im Panel neben jeden Befund roh den Wert von `fromLegalSource`,
+> speichern. Stufe 2: Gib jeder Karte `mode={scopeFor(finding, 'gesetz')}`
+> aus `src/lib/live/scope.ts`, speichern. Stufe 3: Zeig, dass Karten im
+> Modus `markierung` jetzt die Fundstelle aus `legalSource` als Tag tragen,
+> speichern. Stufe 4: Zähler über dem Panel mit `countScopes` als
+> `zaehler`-Prop am Arbeitsplatz, speichern.
+
+**Moderation:** Stufe 3 kostet keinen Code, die Karte kann das schon. Das
+ist ein bewusster Moment: "Das kam gratis mit, weil das Datenmodell die
+Fundstelle kennt." Nicht als Pause wirken lassen.
+
+**Probelauf 2026-09-02:** 149 Sekunden, davon 80 für den fehlenden
+Kartenrahmen nach dem Chat-Archetyp. Mit `Arbeitsplatz.svelte` entfällt das.
 
 **Erwartete Bauzeit:** 90 bis 120 Sekunden.
 

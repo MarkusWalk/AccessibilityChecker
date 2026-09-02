@@ -153,6 +153,7 @@ src/
   lib/
     theme/          Unblock-AI-Tokens. Anfassen nur mit gutem Grund.
     assets/         Fertige Komponenten, noch nicht eingebunden.
+                    Arbeitsplatz (Rahmen: Seitenliste, Archetyp, Panel),
                     Chat, Dashboard, GuidedFlow, Report, LiveMonitor,
                     Sidebar, ScreenshotViewer, FindingCard, Counter,
                     Button, Badge, Tag

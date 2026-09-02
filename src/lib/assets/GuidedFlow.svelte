@@ -1,10 +1,13 @@
 <!--
 	E1 Archetyp C: Geführter Flow. Eine Seite nach der anderen. Nur Props:
 	pages, variant (E4-Anzeigevariante, an FindingCard weitergereicht),
+	scopeOption (E2, Default 'nirgends' — je Befund wird scopeFor(f,
+	scopeOption) berechnet und als `mode` an FindingCard weitergereicht),
 	index (kontrolliert von außen), onIndexChange.
 -->
 <script lang="ts">
 	import type { Page } from '$lib/types';
+	import { scopeFor, type ScopeOption } from '$lib/live/scope';
 	import FindingCard from './FindingCard.svelte';
 	import ScreenshotViewer from './ScreenshotViewer.svelte';
 	import Button from './Button.svelte';
@@ -12,11 +15,13 @@
 	let {
 		pages,
 		variant = 'text',
+		scopeOption = 'nirgends',
 		index = 0,
 		onIndexChange
 	}: {
 		pages: Page[];
 		variant?: 'text' | 'begruendung' | 'frage' | 'zwei';
+		scopeOption?: ScopeOption;
 		index?: number;
 		onIndexChange?: (index: number) => void;
 	} = $props();
@@ -43,7 +48,7 @@
 
 			<div class="findings">
 				{#each seite.findings as finding (finding.id)}
-					<FindingCard {finding} {variant} />
+					<FindingCard {finding} {variant} mode={scopeFor(finding, scopeOption)} />
 				{:else}
 					<p class="leer">Keine Befunde auf dieser Seite.</p>
 				{/each}
