@@ -52,32 +52,41 @@ Die Prompts unten verlangen diese Stufen ausdrücklich.
   Prüfungen kennt.
 
 **Im Code.** Die größte sichtbare Veränderung. Bausteine: `Chat.svelte`,
-`Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte`. Der Rahmen für
-alle vier ist `Arbeitsplatz.svelte`: Seitenliste links, der Archetyp rechts
-oben, darunter ein Panel für Befundkarten. Der Rahmen braucht keine Höhe
-von außen und bringt Kopfzone und Leerzustände mit (`docs/ux-prinzipien.md`).
-Bei C und D `hauptAnteil="gross"` mitgeben, weil der Archetyp die Befunde
-selbst zeigt, bei B `"gleich"`. Das Panel ist der Anker für E2
-bis E4, egal welcher Archetyp gewinnt. Die Daten kommen aus dem
-Layout-Loader (`data.bestand` auf der Startseite). Bei A antwortet der
-vorbereitete Endpunkt `/api/chat`, der Verlauf wird als `history`
-mitgeschickt.
+`Dashboard.svelte`, `GuidedFlow.svelte`, `Report.svelte` — diese vier sind
+**Vorlage, nicht Bauteil**: ihre Elemente werden in Stufe 2 abgeschrieben
+und einzeln neu geschrieben, nicht per `import` in einer Zeile eingebunden.
+Der Rahmen für alle vier ist `Arbeitsplatz.svelte`: Seitenliste links, der
+Archetyp rechts oben, darunter ein Panel für Befundkarten — der Rahmen
+selbst (wie `FindingCard`, `Sidebar` und die anderen Bausteine ohne eigene
+Entscheidung) wird ganz normal importiert, nur er bringt keine Entscheidung
+sichtbar mit. Der Rahmen braucht keine Höhe von außen und bringt Kopfzone
+und Leerzustände mit (`docs/ux-prinzipien.md`). Bei C und D
+`hauptAnteil="gross"` mitgeben, weil der Archetyp die Befunde selbst zeigt,
+bei B `"gleich"`. Das Panel ist der Anker für E2 bis E4, egal welcher
+Archetyp gewinnt. Die Daten kommen aus dem Layout-Loader (`data.bestand`
+auf der Startseite). Bei A antwortet der vorbereitete Endpunkt `/api/chat`,
+der Verlauf wird als `history` mitgeschickt.
 
 **Prompt (Beispiel für A):**
 
 > Das Publikum hat entschieden: Chat. Stufe 1: Zeig auf der Startseite erst
 > eine rohe Liste der Seiten mit ihrer Befundzahl aus `data.bestand.pages`,
 > speichern. Stufe 2: Setz `Arbeitsplatz.svelte` aus `src/lib/assets/` ein
-> und `Chat.svelte` in den Bereich `haupt`, speichern. Stufe 3: Ins Panel
-> darunter die Befunde der gewählten Seite als `FindingCard`-Liste,
-> speichern. Stufe 4: `onSend` an `/api/chat` anbinden, mit `history`,
-> Antworten erscheinen im Verlauf, speichern.
+> und schreib in den Bereich `haupt` Eingabefeld, Verlauf und Senden-Button
+> einzeln nach dem Vorbild von `Chat.svelte` — nicht die Komponente
+> importieren —, speichern. Stufe 3: Ins Panel darunter die Befunde der
+> gewählten Seite als `FindingCard`-Liste, speichern. Stufe 4: `onSend` an
+> `/api/chat` anbinden, mit `history`, Antworten erscheinen im Verlauf,
+> speichern.
 
 **Probelauf 2026-09-02:** 62 Sekunden ohne den Arbeitsplatz-Rahmen. Der
 Rahmen kam danach dazu, damit E2 bis E4 nicht erst eine Kartenliste bauen
-müssen.
+müssen. Diese Zeit galt noch für direktes Einbinden von `Chat.svelte` —
+mit Vorlage-statt-Bauteil braucht Stufe 2 spürbar länger.
 
-**Erwartete Bauzeit:** 120 bis 150 Sekunden.
+**Erwartete Bauzeit:** 150 bis 180 Sekunden (oberes Ende bzw. leicht über
+dem alten Budget, weil Stufe 2 die Chat-Elemente einzeln schreibt statt
+die Komponente einzubinden).
 
 ---
 

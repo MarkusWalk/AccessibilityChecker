@@ -30,11 +30,15 @@ Fehler auf dem Bildschirm ist besser als kein Zwischenschritt.
 
 **Kein LLM im Render-Pfad.** `src/lib/server/llm.ts` nur von `scripts/` aus aufrufen — nie aus SvelteKit-Routes oder Komponenten.
 
-**`src/lib/assets/`-Komponenten sind Vorlage, nicht Bauteil.** Nicht per
-`import` als Komponente einbinden und verdrahten — das ersetzt den
-Bauschritt durch einen einzigen Copy-Paste-Moment und ist live nicht von
-"schon vorher fertig gebaut" zu unterscheiden. Stattdessen die Datei lesen
-und ihre Elemente selbst, einzeln, in die Route schreiben.
+**Die vier E1-Archetypen (`Chat`, `Dashboard`, `GuidedFlow`, `Report`) sind
+Vorlage, nicht Bauteil.** Nicht per `import` als Komponente einbinden und
+verdrahten — das ersetzt den Bauschritt durch einen einzigen
+Copy-Paste-Moment und ist live nicht von "schon vorher fertig gebaut" zu
+unterscheiden. Stattdessen die Datei lesen und ihre Elemente selbst,
+einzeln, in die Route schreiben. Gilt nur für die entscheidungsprägende
+Komponente der aktuellen Frage — Bausteine ohne eigene Entscheidung
+(`Arbeitsplatz`, `FindingCard`, `Badge`, `Button`, `Counter`, `Sidebar`,
+`ScreenshotViewer`, `LiveMonitor`) werden normal importiert.
 
 **Import-Konvention:**
 - Svelte-Komponenten: `import ... from '$lib/types'` (Kit-Alias)

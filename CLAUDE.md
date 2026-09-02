@@ -38,8 +38,17 @@ Die vier Stufen für jede Entscheidung, jede endet mit Speichern:
 
 1. **Primitiv.** Etwas Rohes aus den echten Daten erscheint: eine schlichte
    Liste, eine Tabelle, ein Textblock. Ungestylt, absichtlich.
-2. **Gestaltet.** Die vorbereitete Komponente aus `src/lib/assets/` löst das
-   Rohe ab, das Theme greift.
+2. **Gestaltet.** Das Rohe aus Stufe 1 wird durch echtes Markup ersetzt, das
+   wie die entscheidungsprägende Komponente aus `src/lib/assets/` aussieht
+   (bei E1 also `Chat`, `Dashboard`, `GuidedFlow` oder `Report` — die
+   Komponente, die selbst die Antwort auf die aktuelle Frage ist). Diese
+   Datei ist **Vorlage, kein Bauteil**: Struktur, Klassen und Wortwahl
+   daraus abschreiben, ihre Elemente einzeln nacheinander schreiben statt
+   sie per `import` in einer Zeile zu rendern (`<Chat ... />` in einem
+   Schritt ist Kopieren, kein Bauschritt). Reine Bausteine, die selbst
+   keine Entscheidung sichtbar machen — `Arbeitsplatz`, `FindingCard`,
+   `Badge`, `Button`, `Counter`, `Sidebar`, `ScreenshotViewer`,
+   `LiveMonitor` — bleiben normal importierbar, sie sind Infrastruktur.
 3. **Besser.** Zuschnitt, Platz im Layout, Zähler, Zustände.
 4. **Klug.** Logik aus `src/lib/live/` oder ein Endpunkt wird angeschlossen.
 
@@ -177,7 +186,12 @@ docs/
 
 Die Komponenten unter `src/lib/assets/` sind gebaut, aber noch nicht
 zugeschnitten. Genau daraus besteht die Live-Arbeit. Sie liegen dort
-absichtlich unbenutzt.
+absichtlich unbenutzt. Für die vier E1-Archetypen (`Chat`, `Dashboard`,
+`GuidedFlow`, `Report`) gilt: **Vorlage, nicht Bauteil** — Elemente aus der
+Datei abschreiben und neu schreiben, nicht per `import` in einer Zeile
+einbinden (siehe Regel 1, Stufe 2). Bausteine ohne eigene Entscheidung
+(`Arbeitsplatz`, `FindingCard`, `Badge`, `Button`, `Counter`, `Sidebar`,
+`ScreenshotViewer`, `LiveMonitor`) werden normal importiert.
 
 ## Technik
 

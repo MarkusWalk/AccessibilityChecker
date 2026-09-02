@@ -392,6 +392,30 @@ Werkzeug seine eigene, parallele Regeldatei mitbringt (`.bob/rules-*`). Bei
 mehreren Agenten-Tools im selben Repo muss jede ihrer Regeldateien einzeln
 gegen `CLAUDE.md` geprüft werden, nicht nur `AGENTS.md`.
 
+## E1-Archetypen sind jetzt Vorlage, nicht Bauteil (2026-09-02)
+
+Nachtrag zum Bob-Fund oben: nicht nur die Stufenfolge fehlte, Bob hat die
+Stufe „Gestaltet" auch inhaltlich falsch verstanden — er hat `Chat.svelte`
+per `import` eingebunden und in einer Zeile gerendert. Das sieht schnell
+fertig aus, ist aber nicht von „schon vorher gebaut" zu unterscheiden.
+
+Neue Regel, in `CLAUDE.md`, `AGENTS.md` und allen `.bob/rules-*` gleich
+formuliert: die vier E1-Archetypen (`Chat`, `Dashboard`, `GuidedFlow`,
+`Report`) sind **Vorlage, nicht Bauteil** — ihre Elemente werden in Stufe 2
+einzeln aus der Vorlage abgeschrieben, nicht importiert. Bewusst **nicht**
+auf alle `src/lib/assets/`-Komponenten ausgeweitet: `Arbeitsplatz`,
+`FindingCard`, `Badge`, `Button`, `Counter`, `Sidebar`, `ScreenshotViewer`,
+`LiveMonitor` bleiben normal importierbar — sie machen selbst keine
+Entscheidung sichtbar, sind Infrastruktur.
+
+**Zeitbudget-Spannung, ungelöst:** `docs/entscheidungen.md` nennt jetzt für
+E1·A 150–180 statt 120–150 Sekunden, weil Stufe 2 länger dauert als ein
+Import. Das reibt sich mit dem Abbruchkriterium aus `CLAUDE.md` (150
+Sekunden pro Bauschritt) — E1·A könnte am eigenen neuen Budget knapp
+scheitern. Nicht selbst entschieden, ob das Abbruchkriterium für E1 auf
+180 Sekunden angehoben wird oder ob Stufe 2 schlanker bleiben muss (z.B.
+nur die zwei, drei sichtbarsten Elemente einzeln, der Rest kompakter).
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden

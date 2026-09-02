@@ -55,10 +55,13 @@ Das Datenmodell in [`src/lib/types.ts`](src/lib/types.ts) trägt **alle** fünf 
 Komponenten sind fertig, aber noch nicht in eine Route eingebunden. **Das Verdrahten passiert live.**
 Das Verbessern der Komponenten selbst ist erlaubt. Verdrahten vorab ist verboten.
 
-**Vorlage, nicht Bauteil.** Nicht per `import` einbinden und in einer Zeile
+**Die vier E1-Archetypen (`Chat`, `Dashboard`, `GuidedFlow`, `Report`) sind
+Vorlage, nicht Bauteil.** Nicht per `import` einbinden und in einer Zeile
 rendern (`<Chat ... />`) — das ist Kopieren, kein Bauschritt. Struktur und
 Markup der Datei als Vorlage lesen, die Elemente selbst, einzeln, in die
-Route schreiben.
+Route schreiben. Bausteine ohne eigene Entscheidung (`Arbeitsplatz`,
+`FindingCard`, `Badge`, `Button`, `Counter`, `Sidebar`, `ScreenshotViewer`,
+`LiveMonitor`) werden normal importiert.
 
 **Kritisch:** `Arbeitsplatz.svelte` ist der Rahmen nach E1 — Seitenliste links, Archetyp rechts oben, Befundliste darunter. `hauptAnteil`-Prop je Archetyp: `'klein'` (Chat), `'gleich'` (Dashboard), `'gross'` (GuidedFlow/Report).
 
