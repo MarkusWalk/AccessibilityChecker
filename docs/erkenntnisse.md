@@ -201,6 +201,38 @@ D Screenshot, "Suche und Filter"), Screenshot je Entscheidung.
 - **Zeitrahmen hält.** Der Ablauf wirkt in ca. 150 Sekunden je Entscheidung
   machbar, tendenziell schneller als veranschlagt (siehe E3).
 
+## Zweiter Probelauf und der Wizard-Umbau (2026-09-02)
+
+Zweiter Subagenten-Durchlauf mit anderen Beispieloptionen (C Geführt, C
+Ermessen, B Schwere, C Markierung+Frage, Einschätzung-Badge) hat einen
+echten Architekturkonflikt sichtbar gemacht, keinen Implementierungsfehler:
+
+- **"Geführt" war nur eine andere Sortierung, kein Wizard.** Klickt man in
+  der Seitenliste, während `GuidedFlow` läuft, passiert sichtbar nichts —
+  `Arbeitsplatz.svelte` ist für freie Navigation gebaut (das ist B/Dashboard-
+  Denken), "Geführt" bedeutet aber per Definition das Gegenteil: die
+  Reihenfolge liegt beim System, nicht bei freier Wahl. Beides gleichzeitig
+  aktiv zu lassen sieht auf der Bühne wie ein Bug aus.
+- **Was ein echter Wizard im Webdesign ausmacht:** Reihenfolge beim System
+  statt bei der Person, ein Fokus pro Schritt statt einer ganzen Liste,
+  sichtbarer linearer Fortschritt, freie Navigation als Ausnahme statt
+  Grundausstattung.
+- **Umgesetzt, nicht nur dokumentiert.** `GuidedFlow.svelte` zeigt jetzt
+  einen Befund pro Schritt (nicht mehr alle Befunde einer Seite auf einmal),
+  mit echtem Abschluss-Screen ("Alle Befunde durchgearbeitet — X Seiten · Y
+  Befunde gesehen"). `Sidebar.svelte` hat ein neues `interactive`-Flag,
+  `Arbeitsplatz.svelte` reicht es als `sidebarInteractive` durch — bei
+  `false` wird die Seitenliste zur reinen Fortschrittsanzeige, ohne Klick,
+  ohne Hover. Am Live-Tag: `sidebarInteractive={false}` mitgeben, sobald
+  Geführt gewinnt, sonst bleibt der alte Widerspruch bestehen.
+- **API-Bruch bewusst in Kauf genommen.** `GuidedFlow` hatte vorher
+  `index`/`onIndexChange` von außen (Seiten-Index). Jetzt führt es seinen
+  Fortschritt selbst (Schritt-Index über alle Befunde) und meldet nur noch
+  die aktuelle Seite nach außen (`onPageChange`). `+page.svelte` und
+  `probe/+page.svelte` sind entsprechend angepasst, `npm run check`: 0
+  Fehler. Das ist ein Vorgriff, kein Live-Bauschritt — am Tag selbst ist
+  `GuidedFlow` damit sofort fertig, wenn C gewinnt.
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
@@ -211,4 +243,7 @@ D Screenshot, "Suche und Filter"), Screenshot je Entscheidung.
 - Vor dem Webinar alle anderen Claude-Sessions auf dem Repo schließen (Port/Browser-Konflikt)
 - Rollback im echten Repo messen, Terminal-Alias für tag und rollback
 - Bildschirmregie und Lesbarkeit in Teams
-- Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen (`docs/ux-prinzipien.md`)
+- Alle vier E1-Archetypen im neuen Rahmen einmal durchspielen
+  (`docs/ux-prinzipien.md`) — für Geführt nach dem Wizard-Umbau erneut prüfen
+- Prüfen, ob `docs/entscheidungen.md` für E1 C den Wizard-Charakter (Sidebar
+  wird Fortschrittsanzeige) erwähnen sollte, damit die Prompt-Vorlage dazu passt

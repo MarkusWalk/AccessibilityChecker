@@ -24,6 +24,10 @@
 	                             Default (Chat oben, Liste dominiert),
 	                             'gross' für Bericht und Geführt, die selbst
 	                             die Befunde zeigen.
+	  sidebarInteractive?: boolean — Default true. Auf false setzen, wenn
+	                             der Archetyp selbst die Reihenfolge vorgibt
+	                             (Geführt/Wizard): die Seitenliste wird dann
+	                             zur reinen Fortschrittsanzeige, kein Klick.
 	  Snippets: haupt (Pflicht), panel (optional), kopf (optional, ersetzt
 	  die Standard-Kopfzone des Panels — der Landeplatz für E5-Filter)
 
@@ -61,6 +65,7 @@
 		zaehler,
 		kontext,
 		hauptAnteil = 'klein',
+		sidebarInteractive = true,
 		haupt,
 		panel,
 		kopf,
@@ -71,6 +76,7 @@
 		zaehler?: string;
 		kontext?: string;
 		hauptAnteil?: 'klein' | 'gleich' | 'gross';
+		sidebarInteractive?: boolean;
 		haupt: Snippet;
 		panel?: Snippet;
 		kopf?: Snippet;
@@ -95,7 +101,13 @@
 </script>
 
 <div class="arbeitsplatz werkzeug">
-	<Sidebar {pages} selectedUrl={selected?.url ?? null} onSelect={waehleSeite} {gruppen} />
+	<Sidebar
+		{pages}
+		selectedUrl={selected?.url ?? null}
+		onSelect={waehleSeite}
+		{gruppen}
+		interactive={sidebarInteractive}
+	/>
 
 	<div class="rechts spalte anteil-{hauptAnteil}">
 		<div class="haupt-bereich">

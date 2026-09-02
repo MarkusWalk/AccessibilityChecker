@@ -6,6 +6,11 @@
 	Ruhig gehalten: Titel ohne Host-Präfix, höchstens zwei Zeilen, die
 	Befundzahl als Zahl, die Schwere als Farbstreifen links statt als Badge
 	in jeder Zeile. Badges bleiben den Karten vorbehalten.
+
+	interactive (Default true): bei false wird die Liste zur reinen
+	Fortschrittsanzeige — kein Klick, kein Hover, nur die aktive Zeile
+	zeigt, wo man steht. Für den Wizard-Charakter von Geführt (E1 C), wo
+	die Reihenfolge beim System liegt, nicht bei freier Auswahl.
 -->
 <script lang="ts">
 	import type { Page } from '$lib/types';
@@ -15,12 +20,14 @@
 		pages,
 		selectedUrl = null,
 		onSelect,
-		gruppen
+		gruppen,
+		interactive = true
 	}: {
 		pages: Page[];
 		selectedUrl?: string | null;
 		onSelect?: (url: string) => void;
 		gruppen?: Record<string, Page[]>;
+		interactive?: boolean;
 	} = $props();
 
 	function schwersteSeverity(page: Page): Page['findings'][number]['severity'] | null {
@@ -68,10 +75,12 @@
 		<button
 			class="entry {severity ?? 'ohne'}"
 			class:active={page.url === selectedUrl}
+			class:static={!interactive}
 			aria-current={page.url === selectedUrl ? 'true' : undefined}
+			tabindex={interactive ? 0 : -1}
 			title={page.title}
-			onclick={() => onSelect?.(page.url)}
-			onkeydown={tastatur}
+			onclick={interactive ? () => onSelect?.(page.url) : undefined}
+			onkeydown={interactive ? tastatur : undefined}
 		>
 			<span class="title zeilen-2">{shortTitle(page.title)}</span>
 			<span class="meta">
@@ -167,6 +176,14 @@
 	.entry.active {
 		background: var(--color-surface-tint);
 		box-shadow: inset 0 0 0 1px var(--color-accent);
+	}
+
+	.entry.static {
+		cursor: default;
+	}
+
+	.entry.static:hover {
+		background: none;
 	}
 
 	.entry:focus-visible {

@@ -33,7 +33,6 @@
 	);
 
 	let ausgewaehlt = $state<Page | undefined>(undefined);
-	let index = $state(0);
 	let nachrichten = $state<{ role: 'user' | 'assistant'; text: string }[]>([]);
 	let wartet = $state(false);
 	let aktiveFindingId = $state<string | null>(null);
@@ -94,7 +93,12 @@
 			{:else if archetyp === 'dashboard'}
 				<Dashboard pages={data.bestand.pages} {variant} scopeOption={scope} selectedUrl={ausgewaehlt?.url} />
 			{:else if archetyp === 'gefuehrt'}
-				<GuidedFlow pages={data.bestand.pages} {variant} scopeOption={scope} {index} onIndexChange={(i) => (index = i)} />
+				<GuidedFlow
+					pages={data.bestand.pages}
+					{variant}
+					scopeOption={scope}
+					onPageChange={(p) => (ausgewaehlt = p ?? undefined)}
+				/>
 			{:else}
 				<Report pages={data.bestand.pages} bestandLabel={label} scopeOption={scope} />
 			{/if}
