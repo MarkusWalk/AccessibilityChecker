@@ -80,9 +80,24 @@ Ohne Modell, rein regelbasiert. Schnell und verlässlich. `scripts/lib/rules.ts`
 - [x] `src/lib/server/llm.ts`, providerneutral, Zugang über Umgebungsvariable
       (`LLM_PROVIDER=ica|mock`, `ICA_API_URL`, `ICA_API_KEY`, `ICA_MODEL`).
       Ohne ICA-Zugangsdaten läuft automatisch der Mock-Adapter — die
-      Vorbereitung blockiert nie an fehlendem Zugang. Das ICA-Request/
-      Response-Schema ist als TODO markiert und muss angepasst werden,
-      sobald es vorliegt (Fundstelle: `IcaAdapter.complete` in `llm.ts`).
+      Vorbereitung blockiert nie an fehlendem Zugang.
+- [x] **ICA-Zugang eingerichtet und live getestet (2026-09-02).** Echtes
+      Schema (OpenAI-kompatibel, bestätigt gegen
+      `https://api.nextgen-beta.ica.ibm.com/ica/v1`):
+      `POST {ICA_API_URL}/chat-models/chat/completions` mit
+      `{ model, messages: [{role:'user', content}], stream: false }`,
+      Antwort über `choices[0].message.content`. `ICA_MODEL` ist jetzt
+      Pflicht (keine erratbare Default-ID) — Modell-IDs stehen unter
+      `GET {ICA_API_URL}/chat-models`, verwendet wird
+      `ibm/granite-4-h-small` (günstig, IBM-eigen). `.env` liegt lokal
+      (gitignored), Werte siehe dort.
+- [x] **Wichtiger Fund dabei:** `npm run dev` liest `.env` von sich aus
+      NICHT in `process.env` — `llm.ts` sah `ICA_API_KEY` sonst nie, ohne
+      Fehler (stiller Rückfall auf `mock`). Behoben in `vite.config.ts`
+      (`loadEnv()` + `Object.assign(process.env, …)`, Teil von Vite selbst,
+      keine neue Abhängigkeit). Verifiziert: `npm run dev` ganz ohne
+      manuelles `export`/`source .env` liefert jetzt `provider: "ica"` mit
+      echter Modellantwort.
 - [x] Plattencache je Anfrage (`src/lib/data/.llm-cache/`), ein zweiter Lauf
       ist sofort fertig
 - [x] `scripts/analyze.ts` füllt die Felder, die Urteil verlangen:
@@ -218,7 +233,10 @@ Platzhaltertext ("[Mock] Kein Vorlagen-Eintrag …") statt einer sinnvollen
 Antwort — der Endpunkt selbst arbeitet korrekt, das ist eine Einschränkung
 des Mocks, die `llm.ts` gehört (dort nicht angefasst, siehe CLAUDE.md).
 Mit `LLM_PROVIDER=ica` und echtem Zugang antwortet derselbe Endpunkt ohne
-Codeänderung sinnvoll.
+Codeänderung sinnvoll — **inzwischen live bestätigt** (2026-09-02, siehe
+Abschnitt 4): reale Frage über `/api/chat`, `provider: "ica"`, inhaltlich
+passende Antwort auf Deutsch, keine Codeänderung am Endpunkt selbst nötig
+gewesen (nur `IcaAdapter` in `llm.ts` ans echte Schema angepasst).
 
 ## 6 Absicherung
 

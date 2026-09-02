@@ -292,10 +292,59 @@ Fehler/Warnungen nach der Korrektur.
   Anteils-Vorgabe je Archetyp gehört in den Prompt-Text selbst, nicht nur in
   die Tabelle darüber, sonst wird sie beim Bauen leicht übersprungen.
 
+## Vierter Probelauf: Chat/Ermessen/Thema/Frage/LiveMonitor (2026-09-02)
+
+Pfad: E1·A Chat, E2·C Beim Ermessen, E3·D Nach Thema, E4·C Markierung mit
+Frage, E5 Live-Crawl-Status. Erster Durchlauf mit dem Chat-Archetyp im neuen
+Arbeitsplatz-Rahmen und erster mit E3·D (Gruppierung) tatsächlich gebaut statt
+nur beschrieben. Diesmal kein Architektur-Konflikt — der Rehearsal-Agent bekam
+`docs/erkenntnisse.md` mit, wie seit Probelauf 3 vorgeschrieben, und hat die
+dort dokumentierten Entscheidungen (Dashboard schlank halten, `hauptAnteil`
+je Archetyp) nicht wiederholt falsch gemacht. E5 brauchte einen neuen,
+legitimen Lese-Endpunkt `src/routes/api/live-status/+server.ts` (liest
+`src/lib/data/live-status.json` mit Demo-Fallback) — bleibt dauerhaft im
+Projekt, kein Rückbau. Archiviert unter
+`docs/archiv/probelauf-4-2026-09-02/`.
+
+## ICA-Zugang eingerichtet und der stille `process.env`-Fallstrick (2026-09-02)
+
+Markus hat den `ICA_API_KEY` in `.env` hinterlegt. Beim Einrichten zwei
+Funde, die es wert sind, hier zu stehen, statt nur im Commit zu verschwinden:
+
+1. **Das ICA-Schema war bis dahin ein Platzhalter** (TODO in `llm.ts`).
+   Gegen die echte API (OpenAI-kompatibel,
+   `https://api.nextgen-beta.ica.ibm.com/ica/v1`) getestet und bestätigt:
+   `POST {ICA_API_URL}/chat-models/chat/completions` mit
+   `{model, messages:[{role:'user', content}], stream:false}`, Antwort über
+   `choices[0].message.content`. `ICA_MODEL` ist jetzt Pflicht statt eines
+   erratenen Defaults — es gibt keine sinnvolle Modell-ID, die man raten
+   könnte, sie kommt aus `GET {ICA_API_URL}/chat-models`. Gewählt:
+   `ibm/granite-4-h-small` (günstig, IBM-eigenes Modell, passt zum
+   Souveränitäts-Thema des Webinars).
+2. **Der eigentliche Fallstrick:** ein normales `npm run dev` liest `.env`
+   in diesem Projekt NICHT von sich aus in `process.env` ein — `llm.ts` sah
+   `ICA_API_KEY` also nie, ohne dass irgendwo ein Fehler auftauchte
+   (`createAdapter()` fällt still auf `mock` zurück, sobald `ICA_API_KEY`
+   `undefined` ist). Das wäre am Webinartag ein stiller, schwer zu
+   diagnostizierender Fehlschlag gewesen: Markus hätte den Key gesetzt
+   geglaubt, aber der Chat hätte trotzdem nur Mock-Antworten geliefert.
+   Behoben in `vite.config.ts` mit Vites eigenem `loadEnv()` (keine neue
+   Abhängigkeit). Verifiziert: ein ganz gewöhnliches `npm run dev`, ohne
+   manuelles `export`/`source .env`, liefert jetzt `provider: "ica"` mit
+   einer echten, inhaltlich passenden Antwort über `/api/chat`.
+
+Lehre: providerneutrale Konfiguration über Umgebungsvariablen ist nur so
+gut wie der Mechanismus, der sie tatsächlich in den Prozess lädt — das
+gehört mitgetestet, nicht nur der Adapter-Code selbst.
+
 ## Offen vor dem Tag
 
 - Plex Mono lokal einbinden
-- ICA-Zugang, Adapter, Analyse mit echtem Modell
+- ~~ICA-Zugang, Adapter, Analyse mit echtem Modell~~ erledigt 2026-09-02,
+  siehe oben — Zugang funktioniert, echtes Schema bestätigt. Offen bleibt
+  nur: `scripts/analyze.ts` einmal mit `LLM_PROVIDER=ica` gegen einen
+  kleinen Bestand laufen lassen (bisher nur der Chat-Endpunkt live getestet,
+  nicht die Analyse-Pipeline).
 - ~~Alle Optionen mit Zeitmessung durchspielen, Screenshots je Entscheidung~~
   erledigt 2026-09-02, siehe oben
 - E5-Suchbegriff für die Vorführung vorab festlegen (Klartext, kein Regel-Schlüssel)

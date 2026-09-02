@@ -18,35 +18,42 @@ export interface LlmAdapter {
 }
 
 /**
- * IBM Consulting Assistants (ICA) als Default-Adapter.
+ * IBM Consulting Advantage (ICA) als Default-Adapter. OpenAI-kompatibles
+ * Chat-Completions-Schema, bestätigt gegen die echte API (2026-09-02):
  *
- * TODO, sobald das genaue ICA-Request/Response-Schema vorliegt: Der
- * fetch()-Aufruf unten ist ein plausibler Platzhalter (Bearer-Token,
- * {model, prompt}-Body, {text}-Antwort). An der markierten Stelle anpassen —
- * der Rest der Datei (Cache, Auswahl, analyze.ts) bleibt unverändert.
+ *   POST {ICA_API_URL}/chat-models/chat/completions
+ *   Body: { model, messages: [{ role: 'user', content: prompt }], stream: false }
+ *   Antwort: { choices: [{ message: { content } }] }
+ *
+ * ICA_API_URL ist die Basis-URL ohne Pfad (Server aus der ICA-OpenAPI-Doku:
+ * https://api.nextgen-beta.ica.ibm.com/ica/v1). ICA_MODEL muss eine echte
+ * Modell-ID aus `GET {ICA_API_URL}/chat-models` sein, z.B.
+ * "ibm/granite-4-h-small" (günstig, IBM-eigenes Modell), "claude-haiku-4-5"
+ * oder "gpt-4o" — es gibt keinen sinnvollen Default, den man erraten könnte.
  */
 class IcaAdapter implements LlmAdapter {
 	readonly name = 'ica';
-	private readonly apiUrl: string;
+	private readonly endpoint: string;
 	private readonly apiKey: string;
 	private readonly model: string;
 
 	constructor() {
 		const apiUrl = process.env.ICA_API_URL;
 		const apiKey = process.env.ICA_API_KEY;
-		if (!apiUrl || !apiKey) {
+		const model = process.env.ICA_MODEL;
+		if (!apiUrl || !apiKey || !model) {
 			throw new Error(
-				'ICA_API_URL und ICA_API_KEY müssen gesetzt sein, um LLM_PROVIDER=ica zu nutzen.'
+				'ICA_API_URL, ICA_API_KEY und ICA_MODEL müssen gesetzt sein, um LLM_PROVIDER=ica zu nutzen ' +
+					'(Modell-ID aus GET {ICA_API_URL}/chat-models, z.B. "ibm/granite-4-h-small").'
 			);
 		}
-		this.apiUrl = apiUrl;
+		this.endpoint = `${apiUrl.replace(/\/$/, '')}/chat-models/chat/completions`;
 		this.apiKey = apiKey;
-		this.model = process.env.ICA_MODEL ?? 'default';
+		this.model = model;
 	}
 
 	async complete(prompt: string, opts?: { json?: boolean }): Promise<string> {
-		// --- TODO: exaktes ICA-Schema hier einsetzen, sobald bekannt ---
-		const res = await fetch(this.apiUrl, {
+		const res = await fetch(this.endpoint, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -54,20 +61,34 @@ class IcaAdapter implements LlmAdapter {
 			},
 			body: JSON.stringify({
 				model: this.model,
-				prompt,
-				response_format: opts?.json ? 'json' : 'text'
+				messages: [{ role: 'user', content: prompt }],
+				stream: false,
+				// Best-effort, OpenAI-üblich — die ICA-Doku bestätigt dieses Feld
+				// nicht ausdrücklich, wird bei Nichtunterstützung ignoriert statt
+				// abzulehnen (getestet gegen chat-models).
+				...(opts?.json ? { response_format: { type: 'json_object' } } : {})
 			})
 		});
 		if (!res.ok) {
-			throw new Error(`ICA-Anfrage fehlgeschlagen: ${res.status} ${res.statusText}`);
+			let detail = '';
+			try {
+				const err = (await res.json()) as { detail?: string };
+				detail = err.detail ?? '';
+			} catch {
+				// Antwort war kein JSON — Statuszeile allein reicht als Fehlermeldung.
+			}
+			throw new Error(
+				`ICA-Anfrage fehlgeschlagen: ${res.status} ${res.statusText}${detail ? ` — ${detail}` : ''}`
+			);
 		}
-		const data = (await res.json()) as { text?: string; response?: string; output?: string };
-		const text = data.text ?? data.response ?? data.output;
+		const data = (await res.json()) as {
+			choices?: { message?: { content?: string } }[];
+		};
+		const text = data.choices?.[0]?.message?.content;
 		if (typeof text !== 'string') {
-			throw new Error('ICA-Antwort hat kein erkennbares Textfeld (text/response/output).');
+			throw new Error('ICA-Antwort ohne choices[0].message.content.');
 		}
 		return text;
-		// --- Ende TODO ---
 	}
 }
 

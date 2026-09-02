@@ -49,19 +49,24 @@ Beispielbestand (`fallback`) liegen als weitere fertige Bestände unter
 Platzhalter-Screenshot unter `static/screenshots/fallback/` gesetzt, da die
 Seite fiktiv ist und sich nicht crawlen lässt.
 
-Ohne `ICA_API_URL`/`ICA_API_KEY` läuft die Modellanalyse automatisch über
-den Mock-Adapter (offline, deterministisch). Für echte ICA-Anbindung:
+Ohne `ICA_API_URL`/`ICA_API_KEY`/`ICA_MODEL` läuft die Modellanalyse
+automatisch über den Mock-Adapter (offline, deterministisch). Für echte
+ICA-Anbindung (IBM Consulting Advantage, OpenAI-kompatibles
+Chat-Completions-Schema, bestätigt 2026-09-02):
 
 ```bash
-export LLM_PROVIDER=ica
-export ICA_API_URL=...
-export ICA_API_KEY=...
-export ICA_MODEL=...   # optional
+# .env, wird von vite.config.ts automatisch in process.env geladen —
+# kein manuelles `export` bzw. `source .env` vor `npm run dev` nötig.
+ICA_API_URL=https://api.nextgen-beta.ica.ibm.com/ica/v1
+ICA_API_KEY=...
+ICA_MODEL=ibm/granite-4-h-small   # oder eine andere ID aus GET {ICA_API_URL}/chat-models
 ```
 
-Das genaue ICA-Request/Response-Schema ist in `src/lib/server/llm.ts`
-(`IcaAdapter.complete`) als TODO markiert und muss dort einmal angepasst
-werden.
+`LLM_PROVIDER` muss nicht extra gesetzt werden: Ist `ICA_API_KEY` vorhanden,
+wählt `src/lib/server/llm.ts` automatisch `ica`, sonst `mock`. Alle drei
+ICA-Variablen sind Pflicht — `IcaAdapter` wirft sonst beim ersten Aufruf
+einen Fehler (kein Absturz: `/api/chat` fällt auf den Datenpfad zurück,
+`scripts/analyze.ts` bricht ab und nennt den fehlenden Wert).
 
 ## Absicherung während des Live-Builds
 
