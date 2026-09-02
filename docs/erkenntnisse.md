@@ -284,6 +284,13 @@ Fehler/Warnungen nach der Korrektur.
   sichtbaren Haken** — weder Sidebar noch Dashboard zeigten `reach` an, nur
   die Reihenfolge änderte sich. Der neue Reichweite-Balken im
   Prioritäten-Block schließt das.
+- **`hauptAnteil` wurde vom Bau-Agenten schlicht vergessen, obwohl
+  `docs/entscheidungen.md` es für B explizit vorschreibt** ("bei B
+  `'gleich'`"). Ohne das Prop blieb Dashboard auf dem Default `'klein'` und
+  der Prioritäten-Block quetschte sich in einen winzigen Bereich — sichtbar
+  erst beim genauen Hinschauen, nicht beim `npm run check`. Lehre: die
+  Anteils-Vorgabe je Archetyp gehört in den Prompt-Text selbst, nicht nur in
+  die Tabelle darüber, sonst wird sie beim Bauen leicht übersprungen.
 
 ## Offen vor dem Tag
 
