@@ -1,6 +1,8 @@
 <!--
-	Szene 2: Was gebaut wird. Was das Werkzeug ist, was es liefert, und wie es
-	sich einordnet. Drei Blöcke: prüfen, liefern, nicht sein.
+	Szene 2: Das Szenario, das den Bau begründet. Sie befähigen ein neues
+	Digitalteam für ihr Land — alle Portale sollen bürgernah werden. Danach
+	drei Blöcke, wie das Werkzeug zu diesem Auftrag beiträgt: prüfen,
+	liefern, nicht sein.
 -->
 <script lang="ts">
 	let { bestand = 'Weinheim', seiten = 50 }: { bestand?: string; seiten?: number } = $props();
@@ -23,14 +25,16 @@
 </script>
 
 <section class="szene szene-weiss">
-	<p class="kicker">01 · Das Werkzeug</p>
+	<p class="kicker">01 · Das Szenario</p>
 	<h1 class="intro-h1 h1-mittel">
-		Ein <span class="akzent">Prüfwerkzeug</span> für den Webauftritt einer Behörde.
+		Sie bauen ein neues <span class="akzent">Digitalteam</span> für Ihr Land auf.
 	</h1>
 	<p class="lead stufe" style="--i: 0; --start: 120ms">
-		Es liest die Seiten einer Kommune, findet Stellen, die Menschen ausschließen oder nicht
-		verstehen, und macht daraus eine Arbeitsliste für die Redaktion. Mit KI, aber nach Regeln,
-		die das Haus selbst setzt.
+		Der Auftrag: alle Portale des Landes und seiner Kommunen werden
+		<strong>bürgernah</strong>, <strong>zugänglich</strong> und <strong>verständlich</strong> —
+		damit sich Bürgerinnen und Bürger zurechtfinden, ohne Amtsdeutsch zu übersetzen oder zweimal
+		anzurufen. Bei Hunderten Websites und wenig Redaktion reicht Handarbeit allein nicht.
+		Deswegen dieses Werkzeug.
 	</p>
 
 	<div class="spalten">
