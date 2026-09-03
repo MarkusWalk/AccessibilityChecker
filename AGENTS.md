@@ -99,3 +99,8 @@ Befunde sind Hinweise, keine Vorwürfe. Kein Konformitäts-Disclaimer weglassen.
 
 Bei Prompts die mit "Das Publikum hat entschieden" beginnen: Deutsch, eine Statuszeile je Stufe,
 keine Erklärungen, keine Rückfragen. Nie committen oder taggen.
+
+**Wortwahl:** "abschreiben"/"kopieren" sind interne Begriffe für die
+Bauregel, keine Bühnensprache. Auf der Bühne z. B.: „Markup aus
+`Chat.svelte` und `Arbeitsplatz.svelte` wird geschrieben, Elemente einzeln
+überlegt." Nicht: „…wird abgeschrieben."

@@ -119,6 +119,13 @@ erkennbar aus dem Live-Build stammt:
 
 - Antworte auf Deutsch, eine kurze Statuszeile je Stufe, keine Erklärungen,
   keine Rückfragen. Der Verlauf ist für das Publikum sichtbar.
+- **Wortwahl in der Statuszeile:** "abschreiben" und "kopieren" sind
+  interne Begriffe für die Bauregel (Regel 1, Stufe 2), keine Bühnensprache
+  — das klingt vor Publikum nach Abkürzung, nicht nach Handwerk. Auf der
+  Bühne stattdessen z. B.: „Markup aus `Chat.svelte` und
+  `Arbeitsplatz.svelte` wird geschrieben, Elemente einzeln überlegt."
+  Andere brauchbare Formulierungen: „wird Element für Element aufgebaut",
+  „entsteht nach dem Vorbild von …", „wird einzeln nachgebaut".
 - Kein `git commit`, kein `git tag`. Markus sichert selbst mit
   `npm run tag`. Rollback-Punkte müssen sauber bleiben.
 - Bei Zeitüberschreitung bleibt der Teilzustand stehen. Nichts zurückbauen.

@@ -57,6 +57,20 @@ Komponente der aktuellen Frage — Bausteine ohne eigene Entscheidung
 - **E5-Suche matcht gegen Klartext**, nicht gegen `rule`-Schlüssel. Suchbegriff vorab festlegen ("alternativ", "hier klicken"), nicht "alt-text-fehlt".
 - **Flex ohne `min-height: 0` kollabiert.** Chat und Sidebar schrumpfen in Flex-Reihen auf null. `.werkzeug` / `.spalte` in `global.css` sind dafür vorhanden — nutzen, nicht freihändig layouten.
 
+## Verhalten auf der Bühne
+
+Bei Prompts, die mit "Das Publikum hat entschieden" beginnen oder erkennbar
+aus dem Live-Build stammen: Deutsch, eine kurze Statuszeile je Stufe, keine
+Erklärungen, keine Rückfragen, nie committen oder taggen.
+
+**Wortwahl:** "abschreiben" und "kopieren" sind interne Begriffe für die
+Bauregel oben (Vorlage, nicht Bauteil) — keine Bühnensprache, das klingt
+vor Publikum nach Abkürzung statt nach Handwerk. Auf der Bühne z. B.:
+„Markup aus `Chat.svelte` und `Arbeitsplatz.svelte` wird geschrieben,
+Elemente einzeln überlegt." Nicht: „…wird abgeschrieben." Weitere
+brauchbare Formulierungen: „wird Element für Element aufgebaut", „entsteht
+nach dem Vorbild von …", „wird einzeln nachgebaut".
+
 ## E5-Vorbereitung (Wildcard)
 
 Fertige, ungenutzte Utilities für wahrscheinliche Wünsche:
