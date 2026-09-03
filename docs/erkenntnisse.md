@@ -442,3 +442,32 @@ nur die zwei, drei sichtbarsten Elemente einzeln, der Rest kompakter).
 - Probelauf-Agenten künftig auch `docs/erkenntnisse.md` mitgeben, nicht nur
   `docs/entscheidungen.md` — sonst wiederholen sie bereits gelöste Konflikte
   (siehe Probelauf 3, Dashboard-Sidebar-Duplikat)
+
+## Modellwahl und KI-Einbindung (Chat vs. Dashboard)
+
+Aktives Modell: **`gpt-5.6-terra-dzus`** über ICA (`ICA_MODEL` in `.env`).
+Verfügbare Modelle abgefragt via `GET {ICA_API_URL}/chat-models` — niemals raten,
+immer frisch prüfen, die Liste ändert sich.
+
+**Wie die KI richtig eingebunden ist — ein für alle Mal:**
+
+- **Chat (E1·A):** Nutzeranfrage → `POST /api/chat` → `complete()` in `src/lib/server/llm.ts`
+  → `IcaAdapter.complete()` → ICA API. Der Endpunkt baut aus `data.bestand.pages` einen
+  kompakten Kontext (5 schwerste Befunde je Seite + Gesamtzahlen) und schickt ihn zusammen
+  mit der Frage an das Modell. Antwort kommt als `{ answer }` zurück, landet als
+  Assistent-Blase im Verlauf. Kein LLM im Render-Pfad — nur der Server-Endpunkt ruft `complete()` auf.
+
+- **Dashboard / alle anderen Archetypen:** Kein eigener LLM-Aufruf. Das Dashboard zeigt
+  Zähler und Prioritäten-Matrix direkt aus `data.bestand.pages` — kein Modell nötig,
+  kein Endpunkt. Würde man für Dashboard eine KI-Zusammenfassung wollen, müsste ein
+  eigener Server-Endpunkt her (analog `/api/chat`), der die Daten vorverarbeitet und
+  `complete()` aufruft.
+
+- **`scripts/analyze.ts`:** Einzige weitere Stelle, die `complete()` aufruft — für die
+  Vorschläge/Begründungen bei der Erstanalyse. Läuft offline/vor dem Webinar, nie im
+  Render-Pfad.
+
+**Regel:** `src/lib/server/llm.ts` und damit `complete()` dürfen **nur** aus
+`src/routes/api/*/+server.ts` oder aus `scripts/` aufgerufen werden — nie direkt
+aus Svelte-Komponenten oder `+page.svelte`.
+
