@@ -46,7 +46,7 @@ function buildContext(pages: Page[]): string {
 		return [
 			`Seite: ${page.title}`,
 			`URL: ${page.url}`,
-			`Verständlichkeit: ${jeAchse.verstaendlichkeit} Hinweise, Zugänglichkeit: ${jeAchse.zugaenglichkeit} Hinweise`,
+			`Gesamt: ${page.findings.length} Hinweise (Verständlichkeit: ${jeAchse.verstaendlichkeit}, Zugänglichkeit: ${jeAchse.zugaenglichkeit})`,
 			zeilen ? `Wichtigste Stellen:\n${zeilen}` : null
 		]
 			.filter((z): z is string => z !== null)
@@ -64,9 +64,12 @@ function buildPrompt(
 	bestandLabel: string,
 	context: string,
 	question: string,
-	history: Verlaufseintrag[]
+	history: Verlaufseintrag[],
+	pages: Page[]
 ): string {
 	const verlauf = history.map((m) => `${m.role === 'user' ? 'Frage' : 'Antwort'}: ${m.text}`).join('\n');
+	const gesamtHinweise = pages.reduce((n, p) => n + p.findings.length, 0);
+	const zusammenfassung = `Gesamtzahlen: ${pages.length} Seiten, ${gesamtHinweise} Hinweise insgesamt.`;
 
 	return [
 		'Du bist eine unterstützende Auskunft zu einer Prüfung von Verständlichkeit und',
@@ -79,6 +82,7 @@ function buildPrompt(
 		'etwas zu erfinden.',
 		'',
 		`Bestand: ${bestandLabel}`,
+		zusammenfassung,
 		'',
 		context,
 		verlauf ? `\nBisheriger Verlauf:\n${verlauf}` : '',
@@ -223,7 +227,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	try {
 		const context = buildContext(pages);
-		const prompt = buildPrompt(name, context, question, body.history ?? []);
+		const prompt = buildPrompt(name, context, question, body.history ?? [], pages);
 		const answer = await complete(prompt);
 		return json({ answer, provider: currentProvider(), source: 'modell' satisfies Quelle });
 	} catch (err) {
