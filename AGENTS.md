@@ -33,10 +33,21 @@ src/routes/  →  liest Page[]-JSON direkt (kein API-Endpunkt, kein LLM im Rende
 ```
 
 - `scripts/lib/rules.ts` — regelbasierte Rohanalyse, **kein LLM**, liefert `Finding[]` mit `suggestion: null`
-- `src/lib/server/llm.ts` — **nur** von `scripts/` aufrufen, nie aus SvelteKit-Routes oder Komponenten
+- `src/lib/server/llm.ts` — **nur** von `src/routes/api/*/+server.ts` oder `scripts/` aufrufen, nie aus Komponenten oder `+page.svelte`
 - LLM-Antworten gecacht in `src/lib/data/.llm-cache/` (SHA256-Hash) — zweiter Lauf ohne Netz
 - `LLM_PROVIDER=mock` (default ohne `ICA_API_KEY`) liefert deterministisch aus `MOCK_TEMPLATES`
 - `.env` wird von `npm run dev` **nicht** automatisch in `process.env` geladen — behoben via `vite.config.ts` mit Vites `loadEnv()`. Für `scripts/` weiterhin manuelles `export` nötig.
+
+**Aktives Modell: `gpt-5.6-terra-dzus`** via ICA (`ICA_MODEL` in `.env`).
+Verfügbare Modelle: `GET {ICA_API_URL}/chat-models` — niemals raten, immer prüfen.
+
+KI-Einbindung nach Archetyp — Ziel: **jeder Archetyp bekommt einen eigenen LLM-Moment**, nicht nur Chat:
+- **Chat (E1·A):** Frage → `POST /api/chat` → `complete()` → ICA API. Kontext: 5 schwerste Befunde je Seite + Gesamtzahlen aus `data.bestand.pages`.
+- **Dashboard:** noch offen — Ziel ist eine kurze generierte Übersicht ("Was fällt auf?") über dem Befundraster, eigener Endpunkt nötig.
+- **Geführt (Wizard):** noch offen — Ziel ist eine intelligente Anmerkung je Schritt, ein Satz Einordnung zum aktuellen Befund.
+- **Bericht:** noch offen — Ziel ist eine generierte Zusammenfassung am Dokumentanfang.
+- **`scripts/analyze.ts`:** weitere Stelle mit `complete()` — läuft vor dem Webinar, nie im Render-Pfad.
+- **Streaming:** `complete()` setzt `stream: false` fest; ICA unterstützt `stream: true`. Endpunkte sollen streamen (bessere UX), das ist noch nicht angebunden.
 
 ## Die fünf Entscheidungen
 
@@ -66,6 +77,14 @@ Route schreiben. Bausteine ohne eigene Entscheidung (`Arbeitsplatz`,
 **Kritisch:** `Arbeitsplatz.svelte` ist der Rahmen nach E1 — Seitenliste links, Archetyp rechts oben, Befundliste darunter. `hauptAnteil`-Prop je Archetyp: `'klein'` (Chat), `'gleich'` (Dashboard), `'gross'` (GuidedFlow/Report).
 
 **GuidedFlow ist ein echter Wizard** (ein Befund pro Schritt, lineare Reihenfolge). Bei E1·C muss `sidebarInteractive={false}` gesetzt werden, sonst ist die Seitenliste parallel klickbar — sieht aus wie ein Bug.
+
+## Kein starres Schema
+
+Die vier Stufen sind der Normalfall, kein Dogma. Sinnvolle Abweichungen
+sind erwünscht: Chat an die Seite statt mittig oder als Hover-Fenster,
+Dashboard mit klickbaren dynamischen Kacheln statt reiner Zahlen, andere
+Stufenreihenfolge. Keine Beliebigkeit — Stufe 1 ungestylt, jede Stufe
+gespeichert, nie länger als 60 Sekunden ohne Änderung bleiben Pflicht.
 
 ## Während des Live-Builds tabu
 

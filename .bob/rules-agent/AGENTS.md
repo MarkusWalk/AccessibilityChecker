@@ -57,6 +57,25 @@ Komponente der aktuellen Frage — Bausteine ohne eigene Entscheidung
 - **E5-Suche matcht gegen Klartext**, nicht gegen `rule`-Schlüssel. Suchbegriff vorab festlegen ("alternativ", "hier klicken"), nicht "alt-text-fehlt".
 - **Flex ohne `min-height: 0` kollabiert.** Chat und Sidebar schrumpfen in Flex-Reihen auf null. `.werkzeug` / `.spalte` in `global.css` sind dafür vorhanden — nutzen, nicht freihändig layouten.
 
+## Kein starres Schema
+
+Die Stufenfolge oben ist der Normalfall, kein Dogma. Sinnvolle
+Abweichungen sind erwünscht: Chat an die Seite statt mittig oder als
+Hover-Fenster, Dashboard mit klickbaren dynamischen Kacheln statt reiner
+Zahlen, andere Stufenreihenfolge, eine zusätzliche Facette. Keine
+Beliebigkeit — Stufe 1 ungestylt, jede Stufe gespeichert, nie länger als
+60 Sekunden ohne Änderung bleiben Pflicht.
+
+## KI gehört in jeden Archetyp
+
+Nicht nur Chat bekommt einen LLM-Moment — jeder E1-Archetyp einen eigenen:
+Dashboard eine kurze generierte Übersicht ("Was fällt auf?") über dem
+Befundraster, Geführt eine intelligente Anmerkung je Schritt, Bericht eine
+generierte Zusammenfassung am Anfang. Endpunkte sollen **streamen**
+(bessere UX) statt auf die vollständige Antwort zu warten — `complete()`
+in `src/lib/server/llm.ts` setzt aktuell `stream: false` fest, ICA
+unterstützt `stream: true`, das ist noch nicht angebunden.
+
 ## Verhalten auf der Bühne
 
 Bei Prompts, die mit "Das Publikum hat entschieden" beginnen oder erkennbar

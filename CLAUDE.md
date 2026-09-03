@@ -112,6 +112,38 @@ Während des Live-Builds gilt:
 Du darfst technisch alles anfassen. Die Absicherung läuft über Git. Aber jede
 Änderung außerhalb der aktuellen Entscheidung ist ein Risiko ohne Gegenwert.
 
+### Kein starres Schema
+
+Die vier Stufen (Primitiv → Gestaltet → Besser → Klug) sind der Normalfall,
+kein Dogma. Bei einer Entscheidung, die mehr hergibt, weich bewusst ab —
+gemeint sind **sinnvolle Abweichungen**, keine Beliebigkeit: der Chat nicht
+mittig, sondern an die Seite oder als einblendendes Hover-Fenster; das
+Dashboard mit klickbaren, dynamischen Kacheln statt reiner Zahlen; eine
+andere Reihenfolge der Stufen, eine zusätzliche Facette. Nicht jede der
+fünf Entscheidungen muss gleich aussehen. Die Pflichtteile bleiben: Stufe 1
+ungestylt, nach jedem Zwischenschritt speichern, nie länger als 60 Sekunden
+ohne Änderung.
+
+### KI gehört in jeden Archetyp
+
+Nicht nur der Chat bekommt einen LLM-Moment — jede der vier E1-Oberflächen
+irgendwo einen eigenen:
+
+- **Chat:** ist schon von Haus aus ein Chat.
+- **Dashboard:** eine kurze, generierte Übersicht ("Was fällt auf?") über
+  dem Befundraster.
+- **Geführt (Wizard):** eine intelligente Anmerkung je Schritt — ein Satz
+  Einordnung zum aktuellen Befund.
+- **Bericht:** eine generierte Zusammenfassung am Anfang des Dokuments.
+
+Der Endpunkt soll **streamen**, nicht auf die vollständige Antwort warten
+— bessere UX, Text erscheint laufend statt auf einen Schlag.
+`complete()` in `src/lib/server/llm.ts` setzt aktuell `stream: false` fest;
+die ICA-API unterstützt `stream: true` laut Schema, das ist noch nicht
+angebunden. Wer das live baut: `/api/chat/+server.ts` auf eine gestreamte
+Response umstellen (`ReadableStream`/SSE), `Chat.svelte` als Vorlage zeigt
+noch keine Streaming-Anzeige — die entsteht dann live mit.
+
 ### Verhalten auf der Bühne
 
 Gilt für jeden Prompt, der mit "Das Publikum hat entschieden" beginnt oder
@@ -217,6 +249,23 @@ Die Oberfläche muss mit beiden Quellen umgehen, ohne dass etwas umgebaut wird.
 **LLM.** Eine Datei, `src/lib/server/llm.ts`, providerneutral, Zugang über
 Umgebungsvariable. Jede Antwort wird auf Platte gecacht, damit ein zweiter
 Lauf sofort fertig ist. Keine Modellaufrufe im Render-Pfad der Oberfläche.
+
+Aktives Modell: **`gpt-5.6-terra-dzus`** über ICA (`ICA_MODEL` in `.env`).
+Verfügbare Modelle: `GET {ICA_API_URL}/chat-models` — niemals raten, immer prüfen.
+
+KI-Einbindung nach Archetyp:
+
+- **Chat (E1·A):** Nutzeranfrage → `POST /api/chat` (Server-Endpunkt) →
+  `complete()` in `llm.ts` → ICA API. Der Endpunkt baut Kontext aus
+  `data.bestand.pages` (5 schwerste Befunde je Seite + Gesamtzahlen) und
+  schickt ihn mit der Frage ans Modell.
+- **Dashboard / alle anderen Archetypen:** Kein Modellaufruf. Alles direkt
+  aus `data.bestand.pages` gerendert.
+- **`scripts/analyze.ts`:** Einzige weitere Stelle, die `complete()` aufruft
+  — für Vorschläge/Begründungen bei der Erstanalyse, läuft vor dem Webinar.
+
+`complete()` darf **nur** aus `src/routes/api/*/+server.ts` oder `scripts/`
+aufgerufen werden — nie aus Komponenten oder `+page.svelte`.
 
 ## Gestaltung
 
