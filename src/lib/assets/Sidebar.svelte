@@ -71,6 +71,10 @@
 
 {#snippet eintrag(page: Page)}
 	{@const severity = schwersteSeverity(page)}
+	{@const total = page.findings.length}
+	{@const anzHoch = page.findings.filter((f) => f.severity === 'hoch').length}
+	{@const anzMittel = page.findings.filter((f) => f.severity === 'mittel').length}
+	{@const anzNiedrig = page.findings.filter((f) => f.severity === 'niedrig').length}
 	<li>
 		<button
 			class="entry {severity ?? 'ohne'}"
@@ -84,9 +88,16 @@
 		>
 			<span class="title zeilen-2">{shortTitle(page.title)}</span>
 			<span class="meta">
-				<span class="count">{page.findings.length}</span>
-				{page.findings.length === 1 ? 'Befund' : 'Befunde'}
+				<span class="count">{total}</span>
+				{total === 1 ? 'Befund' : 'Befunde'}
 			</span>
+			{#if total > 0}
+				<div class="schwere-balken" aria-hidden="true">
+					{#if anzHoch > 0}<span class="sb-hoch" style="flex: {anzHoch}"></span>{/if}
+					{#if anzMittel > 0}<span class="sb-mittel" style="flex: {anzMittel}"></span>{/if}
+					{#if anzNiedrig > 0}<span class="sb-niedrig" style="flex: {anzNiedrig}"></span>{/if}
+				</div>
+			{/if}
 		</button>
 	</li>
 {/snippet}
@@ -242,4 +253,16 @@
 		letter-spacing: 0;
 		white-space: nowrap;
 	}
+
+	/* E3·B: Schwere-Balken je Seite */
+	.schwere-balken {
+		display: flex;
+		height: 3px;
+		margin-top: var(--space-1);
+		overflow: hidden;
+	}
+
+	.sb-hoch    { background: var(--color-magenta); }
+	.sb-mittel  { background: var(--color-purple); }
+	.sb-niedrig { background: var(--color-teal); }
 </style>
